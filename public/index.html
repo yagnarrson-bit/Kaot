@@ -1815,8 +1815,8 @@ function update(dt){
    if((!NET.on||NET.host)&&MUT.length<Math.floor(curDay/10))spawnMutant()}
   const [mx,my,mag]=moveInput();
   P.run=!!(mx||my)&&!P.crouch&&!P.search&&!P.drv&&!P.ride&&!P.tired&&P.st>0&&(keys.shift||(joy&&mag>.95));
-  if(P.run){P.st=Math.max(0,P.st-dt*20);P.stT=.9;if(P.st<=0&&!P.tired){P.tired=true;toast('Sem fôlego! Descanse um pouco.',null)}}
-  else{P.stT=Math.max(0,P.stT-dt);if(P.stT<=0)P.st=Math.min(100,P.st+dt*((mx||my)?14:24)*(P.fo<=0||P.se<=0?.5:1));if(P.tired&&P.st>=30)P.tired=false}
+  if(P.run){P.st=Math.max(0,P.st-dt*9);P.stT=.6;if(P.st<=0&&!P.tired){P.tired=true;toast('Sem fôlego! Descanse um pouco.',null)}}
+  else{P.stT=Math.max(0,P.stT-dt);if(P.stT<=0)P.st=Math.min(100,P.st+dt*((mx||my)?20:32)*(P.fo<=0||P.se<=0?.5:1));if(P.tired&&P.st>=25)P.tired=false}
   P.fo=Math.max(0,P.fo-dt*(P.run?.4:.26));P.se=Math.max(0,P.se-dt*(P.run?.55:.36));
   if(P.fo<=0)P.hp-=dt*1.4;if(P.se<=0)P.hp-=dt*1.8;
   const inRad=SC.kind==='out'&&dist(P.x,P.y,UX,UY)<URAD;if(inRad)P.hp-=dt*5;
