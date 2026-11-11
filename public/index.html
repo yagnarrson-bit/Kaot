@@ -243,7 +243,10 @@ canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:c
 .mpbox input:focus{outline:none;border-color:var(--edge)}
 #code{text-transform:uppercase;font-family:var(--display);letter-spacing:.1em}
 .mprow{display:grid;grid-template-columns:auto 1fr auto;gap:8px}
-.mprow .xbtn:disabled{opacity:.45;cursor:default}
+.mprow .xbtn:disabled,.pubbtn:disabled{opacity:.45;cursor:default}
+.pubbtn{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:14px;letter-spacing:.06em;padding:10px}
+.pubbtn span{font-family:var(--body);font-size:11px;letter-spacing:0;opacity:.75}
+#menu .pubbtn{background:#2a2110;border-color:#c9a24a;color:#f0d36e}#menu .pubbtn:hover:not(:disabled){background:#3a2d14}
 .mpmsg{margin:0;font-size:12px;color:var(--muted);line-height:1.4}.mpmsg:empty{display:none}
 .mphud{padding:7px 10px;min-width:170px;pointer-events:auto}
 .mphead{display:flex;align-items:center;gap:8px;margin-bottom:4px}.mphead b{font-family:var(--display);font-size:14px;letter-spacing:.1em}.mphead b.off{color:var(--blood)}
@@ -343,6 +346,7 @@ canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:c
       <div class="lbl">Multiplayer online</div>
       <div class="mpbox">
         <input id="nick" maxlength="14" placeholder="Seu apelido" autocomplete="off" spellcheck="false">
+        <button class="xbtn pubbtn" id="mpPublic" disabled>JOGAR ONLINE<span>partida pública · entra direto, sem código</span></button>
         <div class="mprow"><button class="xbtn" id="mpCreate" disabled>CRIAR SALA</button><input id="code" maxlength="12" placeholder="código" autocomplete="off" spellcheck="false"><button class="xbtn" id="mpJoin" disabled>ENTRAR</button></div>
         <p class="mpmsg" id="mpMsg">Verificando conexão…</p>
       </div>
@@ -2827,28 +2831,43 @@ function mapRemotes(g,sc,big){if(!NET.on)return;const pr=(big?6:4.5)/sc;
     g.fillStyle=r.col;g.strokeStyle='#15141b';g.lineWidth=2/sc;g.beginPath();g.arc(q.x,q.y,pr,0,6.28);g.fill();g.stroke()}}
 // ---- sala ----
 const mpMsg=t=>{$('mpMsg').textContent=t};
-function mpSetBusy(b){for(const id of['mpCreate','mpJoin'])$(id).disabled=b}
+function mpSetBusy(b){for(const id of['mpCreate','mpJoin','mpPublic'])$(id).disabled=b}
 function mpCodeGen(){const a='abcdefghjkmnpqrstuvwxyz23456789';let s='';for(let i=0;i<5;i++)s+=a[Math.floor(Math.random()*a.length)];return s}
-async function mpEnter(creating){
-  if(!NET.room){mpSetBusy(true);mpMsg('Conectando ao Claude…');await getRoom();mpSetBusy(false);if(!NET.room){mpMsg(roomWhy());return}}
-  const code=creating?mpCodeGen():String($('code').value||'').toLowerCase().replace(/[^a-z0-9]/g,'');
-  if(!creating&&(code.length<3||code.length>12)){mpMsg('Digite o código da sala (3 a 12 letras ou números).');$('code').focus();return}
+const joinErr=e=>e&&e.code==='not_permitted'?'Sem permissão para salas aqui.':e&&e.code==='limit_reached'?'Sala cheia (máximo de 8 jogadores).':'Não deu para conectar'+(onServer()?' ao servidor. Se ele estava dormindo, espere uns 50 segundos e tente de novo.':'. Tente de novo.');
+// espera o anfitrião da sala aparecer e devolve a partida dele (semente, modo, dificuldade) ou null
+async function mpWaitHost(r,ms){const t0=performance.now();
+  while(performance.now()-t0<ms){let ps=[];try{ps=r.peers()}catch(e){}
+    const gp=ps.filter(p=>!p.sameTab&&p.presence&&p.presence.g),rkOf=p=>Number.isFinite(p.presence.g.r)?p.presence.g.r:1e9;const hp=gp.sort((a,b)=>rkOf(a)-rkOf(b)||(a.peer<b.peer?-1:1))[0];
+    if(hp){const G=hp.presence.g;if(Number.isInteger(G.s)&&G.s>0&&(G.m==='missao'||G.m==='livre')&&DIFF[G.d]){NET.rank=Math.max(...gp.map(p=>rkOf(p)>=1e9?0:rkOf(p)))+1;return{s:G.s,m:G.m,d:G.d,r:NET.rank}}}
+    await new Promise(res=>setTimeout(res,250))}return null}
+const othersIn=r=>{try{return r.peers().filter(p=>!p.sameTab&&!p.isMe).length}catch(e){return 0}};
+async function mpEnter(kind){const creating=kind===true||kind==='create',pub=kind==='public';
+  if(!NET.room){mpSetBusy(true);mpMsg('Conectando…');await getRoom();mpSetBusy(false);if(!NET.room){mpMsg(roomWhy());return}}
+  const code=pub?'':creating?mpCodeGen():String($('code').value||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  if(!creating&&!pub&&(code.length<3||code.length>12)){mpMsg('Digite o código da sala (3 a 12 letras ou números).');$('code').focus();return}
   NET.name=cleanName($('nick').value)||('Agente '+Math.floor(Math.random()*90+10));
-  mpSetBusy(true);mpMsg(creating?'Criando sala…':'Entrando na sala '+code.toUpperCase()+'…');
-  let r;try{r=await NET.room.join('kaot-'+code)}catch(e){mpSetBusy(false);mpMsg(e&&e.code==='not_permitted'?'Sem permissão para salas aqui.':e&&e.code==='limit_reached'?'Sala cheia (máximo de 8 jogadores).':'Não deu para conectar'+(onServer()?' ao servidor. Se ele estava dormindo, espere uns 50 segundos e tente de novo.':'. Tente de novo.'));return}
-  let g;
-  if(creating){GSEED=Math.floor(Math.random()*2147483646)+1;NET.rank=0;g={s:GSEED,m:modeSel,d:diffSel,r:0}}
-  else{r.presence({n:NET.name}).catch(()=>{});const t0=performance.now();
-    while(performance.now()-t0<9000){let ps=[];try{ps=r.peers()}catch(e){}
-      const gp=ps.filter(p=>!p.sameTab&&p.presence&&p.presence.g),rkOf=p=>Number.isFinite(p.presence.g.r)?p.presence.g.r:1e9;const hp=gp.sort((a,b)=>rkOf(a)-rkOf(b)||(a.peer<b.peer?-1:1))[0];
-      if(hp){const G=hp.presence.g;if(Number.isInteger(G.s)&&G.s>0&&(G.m==='missao'||G.m==='livre')&&DIFF[G.d]){NET.rank=Math.max(...gp.map(p=>rkOf(p)>=1e9?0:rkOf(p)))+1;g={s:G.s,m:G.m,d:G.d,r:NET.rank};break}}
-      await new Promise(res=>setTimeout(res,250))}
-    if(!g){try{await r.leave()}catch(e){}mpSetBusy(false);mpMsg('Ninguém nessa sala. Confira o código com quem criou.');return}
+  mpSetBusy(true);
+  let r,g,label;
+  if(pub){// partida pública: procura a primeira sala pública com vaga; se ninguém estiver jogando, abre uma nova (modo livre, sem fim)
+    for(let i=1;i<=40&&!g;i++){mpMsg('Procurando partida pública…');
+      try{r=await NET.room.join('kaot-pub'+i)}catch(e){r=null;if(e&&e.code==='limit_reached')continue;mpSetBusy(false);mpMsg(joinErr(e));return}
+      r.presence({n:NET.name}).catch(()=>{});await new Promise(res=>setTimeout(res,onServer()?400:1500));
+      if(othersIn(r)){mpMsg('Entrando na partida pública '+i+'…');g=await mpWaitHost(r,6000)}
+      if(!g){GSEED=Math.floor(Math.random()*2147483646)+1;NET.rank=0;g={s:GSEED,m:'livre',d:diffSel,r:0}}
+      label='PÚBLICA '+i}
+    if(!g){mpSetBusy(false);mpMsg('Todas as partidas públicas estão cheias. Tente de novo em instantes.');return}
     GSEED=g.s;modeSel=g.m;diffSel=g.d;syncMenuSel()}
-  NET.r=r;NET.code=code;NET.on=true;
+  else{mpMsg(creating?'Criando sala…':'Entrando na sala '+code.toUpperCase()+'…');
+    try{r=await NET.room.join('kaot-'+code)}catch(e){mpSetBusy(false);mpMsg(joinErr(e));return}
+    if(creating){GSEED=Math.floor(Math.random()*2147483646)+1;NET.rank=0;g={s:GSEED,m:modeSel,d:diffSel,r:0}}
+    else{r.presence({n:NET.name}).catch(()=>{});g=await mpWaitHost(r,9000);
+      if(!g){try{await r.leave()}catch(e){}mpSetBusy(false);mpMsg('Ninguém nessa sala. Confira o código com quem criou.');return}
+      GSEED=g.s;modeSel=g.m;diffSel=g.d;syncMenuSel()}
+    label=code.toUpperCase()}
+  NET.r=r;NET.code=pub?label.toLowerCase():code;NET.on=true;
   try{await r.presence({g,n:NET.name})}catch(e){}
   r.onConnection(c=>{if(NET.r===r)$('mpCode').classList.toggle('off',!c)},()=>{});
-  mpSetBusy(false);mpMsg('');$('mpCode').textContent=code.toUpperCase();$('mpHud').hidden=false;
+  mpSetBusy(false);mpMsg('');$('mpCode').textContent=label;$('mpHud').hidden=false;
   start()}
 function mpLeave(){const r=NET.r;NET.r=null;NET.on=false;RP.clear();$('mpHud').hidden=true;if(r)r.leave().catch(()=>{})}
 function syncMenuSel(){document.querySelectorAll('.dbtn').forEach(o=>o.setAttribute('aria-pressed',o.dataset.d===diffSel?'true':'false'));
@@ -2910,7 +2929,7 @@ function roomWhy(){if(!window.claude||!window.claude.use)return 'Este arquivo fo
   if(top)return 'O jogo está aberto numa aba separada. Abra o link dentro do Claude (na janela do artefato) para usar o multiplayer.';
   return 'A sala online não respondeu. Recarregue a página e tente de novo.'}
 mpSetBusy(false);
-getRoom().then(room=>mpMsg(room?'Crie uma sala e passe o código para os amigos, ou digite o código de uma sala para entrar.':roomWhy()));
+getRoom().then(room=>mpMsg(room?'JOGAR ONLINE coloca você numa partida com qualquer pessoa. Para jogar só com amigos, crie uma sala e passe o código.':roomWhy()));
 
 
 // ================= intro (vídeo Khronos) ao abrir o jogo =================
@@ -2939,7 +2958,7 @@ document.querySelectorAll('.charbtn').forEach(b=>b.addEventListener('click',()=>
 function start(){musInit();$('leftLbl').textContent=isFree()?'Abates':'Infectados restantes';$('menu').hidden=true;$('end').hidden=true;$('hud').hidden=false;newGame();invDirty=slotsDirty=petsDirty=whereDirty=true;cam.x=P.x;cam.y=P.y;lastT=0;if(SPAWN.sewer)cutArrive();else{$('toasts').innerHTML='';toast('Você chegou pelo canto '+SPAWN.n+' do mapa. Aperte M para ver o mapa.',null)}}
 $('go').addEventListener('click',()=>{if(NET.on)mpLeave();start()});
 document.querySelectorAll('.mbtn').forEach(b=>b.addEventListener('click',()=>{modeSel=b.dataset.m;syncMenuSel()}));
-$('mpCreate').addEventListener('click',()=>mpEnter(true));$('mpJoin').addEventListener('click',()=>mpEnter(false));
+$('mpPublic').addEventListener('click',()=>mpEnter('public'));$('mpCreate').addEventListener('click',()=>mpEnter(true));$('mpJoin').addEventListener('click',()=>mpEnter(false));
 $('code').addEventListener('keydown',e=>{if(e.key==='Enter')mpEnter(false)});
 const toMenu=()=>{if(NET.on)mpLeave();if(P&&P.drv)P.drv=null;$('pause').hidden=true;$('end').hidden=true;$('hud').hidden=true;$('invPanel').hidden=true;invOpen=false;$('mapPanel').hidden=true;$('menu').hidden=false;P=null;state='menu'};
 $('leaveBtn').addEventListener('click',toMenu);$('pMenu').addEventListener('click',toMenu);$('pResume').addEventListener('click',togglePause);
