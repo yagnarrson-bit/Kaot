@@ -779,16 +779,19 @@ const LAKE={x:1700,y:3080,rx:470,ry:250};
 const UX=5600,UY=4080,URAD=230;
 const REG=[
   {n:'FLORESTA',lx:600,ly:2300,c:'rgba(18,44,16,.45)',rects:[[WALL,WALL,1100,WH-WALL*2],[WALL,3760,3200,4400-3760-WALL]]},
-  {n:'CIDADE',lx:2750,ly:1100,c:null,rects:[[1150,220,5700,2200]]},
-  {n:'CENTRO',lx:5180,ly:1000,c:null,rects:[]},
-  {n:'CASAS E CABANAS',lx:3600,ly:3200,c:null,rects:[[1240,2440,3800,1300]]},
+  // cidades (t:'city', nome grande e dourado no mapa) e locais (nome pequeno)
+  {n:'NOVA ESPERANÇA',t:'city',lx:2750,ly:1100,c:null,rects:[[1150,220,5700,2200]]},
+  {n:'BELA VISTA',t:'city',lx:5650,ly:400,c:null,rects:[]},
+  {n:'RECANTO VERDE',t:'city',lx:3600,ly:3250,c:null,rects:[[1240,2440,3800,1300]]},
+  {n:'CAMPO ALEGRE',t:'city',lx:7900,ly:4300,c:null,rects:[]},
+  {n:'NOVA AURORA',t:'city',lx:11150,ly:400,c:null,rects:[]},
+  {n:'SANTA LUZIA',t:'city',lx:4300,ly:7160,c:null,rects:[]},
   {n:'LAGO',lx:LAKE.x,ly:LAKE.y,c:null,rects:[]},
-  {n:'USINA',lx:UX,ly:UY-260,c:null,rects:[]},
-  {n:'PRAÇA CENTRAL · BASE MILITAR',lx:5180,ly:1530,c:null,rects:[]},{n:'FAZENDA',lx:3500,ly:5440,c:null,rects:[]},
-  {n:'ESTAÇÃO MILITAR',lx:7550,ly:1590,c:null,rects:[]},{n:'ESTAÇÃO MILITAR',lx:7650,ly:5270,c:null,rects:[]},{n:'ESTAÇÃO MILITAR',lx:760,ly:6450,c:null,rects:[]},
-  {n:'TORRE DE RÁDIO',lx:8850,ly:800,c:null,rects:[]},{n:'TORRE DE RÁDIO',lx:8800,ly:5950,c:null,rects:[]},{n:'ZONA LESTE',lx:8000,ly:4400,c:null,rects:[]},{n:'HOSPITAL',lx:7260,ly:1000,c:null,rects:[]},
-  {n:'BAIRRO NOVO',lx:11150,ly:420,c:null,rects:[]},{n:'ZONA INDUSTRIAL',lx:10700,ly:2700,c:null,rects:[]},{n:'ESTAÇÃO MILITAR',lx:11750,ly:5470,c:null,rects:[]},
-  {n:'VILA DO SUL',lx:4300,ly:7180,c:null,rects:[]},{n:'DISTRITO INDUSTRIAL',lx:10900,ly:7950,c:null,rects:[]},{n:'FLORESTA DO SUL',lx:6400,ly:9150,c:null,rects:[]},
+  {n:'USINA',lx:UX,ly:UY-280,c:null,rects:[]},
+  {n:'BASE MILITAR',lx:5180,ly:1530,c:null,rects:[]},{n:'FAZENDA BOA SORTE',lx:3500,ly:5440,c:null,rects:[]},
+  {n:'ESTAÇÃO MILITAR',lx:7550,ly:1580,c:null,rects:[]},{n:'ESTAÇÃO MILITAR',lx:7650,ly:5250,c:null,rects:[]},{n:'ESTAÇÃO MILITAR',lx:760,ly:6430,c:null,rects:[]},{n:'ESTAÇÃO MILITAR',lx:11750,ly:5450,c:null,rects:[]},
+  {n:'TORRE DE RÁDIO',lx:9100,ly:1000,c:null,rects:[]},{n:'TORRE DE RÁDIO',lx:9050,ly:6150,c:null,rects:[]},{n:'HOSPITAL',lx:7260,ly:1000,c:null,rects:[]},
+  {n:'ZONA INDUSTRIAL',lx:10700,ly:2700,c:null,rects:[]},{n:'DISTRITO INDUSTRIAL',lx:10900,ly:7950,c:null,rects:[]},{n:'FLORESTA DO SUL',lx:6400,ly:9150,c:null,rects:[]},
 ];
 let seed=1;function rnd(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}
 const R=(a,b)=>a+rnd()*(b-a),clamp=(v,a,b)=>v<a?a:v>b?b:v,dist=(a,b,c,d)=>Math.hypot(a-c,b-d);
@@ -2636,8 +2639,21 @@ function drawWorldMap(g,W,H,cx,cy,sc,big){
   const p=SC.kind==='out'?P:SC.b.door;const pr=(big?7:5)/sc;
   g.fillStyle='#fff';g.strokeStyle='#15141b';g.lineWidth=2/sc;g.beginPath();g.arc(p.x,p.y,pr,0,6.28);g.fill();g.stroke();
   if(SC.kind==='out'){g.beginPath();g.moveTo(p.x+Math.cos(P.ang)*pr*2.4,p.y+Math.sin(P.ang)*pr*2.4);g.lineTo(p.x+Math.cos(P.ang+2.5)*pr,p.y+Math.sin(P.ang+2.5)*pr);g.lineTo(p.x+Math.cos(P.ang-2.5)*pr,p.y+Math.sin(P.ang-2.5)*pr);g.fill()}
-  if(big){g.textAlign='center';g.font=`bold ${Math.round(15/sc)}px "Silkscreen",monospace`;for(const r of REG){g.fillStyle='rgba(12,11,16,.8)';g.fillText(r.n,r.lx+2/sc,r.ly+2/sc);g.fillStyle='#ece9f5';g.fillText(r.n,r.lx,r.ly)}g.textAlign='left'}
+  if(big)drawMapLabels(g,sc);
   g.restore()}
+// nomes no mapa grande: cidades primeiro; cada nome procura um lugar livre perto do ponto dele (sem sobrepor e sem sair do mapa)
+function drawMapLabels(g,sc){const placed=[],hit=b=>placed.some(p=>b[0]<p[0]+p[2]&&b[0]+b[2]>p[0]&&b[1]<p[1]+p[3]&&b[1]+b[3]>p[1]);
+  g.textAlign='center';g.textBaseline='middle';
+  const list=REG.filter(r=>r.t==='city').concat(REG.filter(r=>r.t!=='city'));
+  for(const r of list){const city=r.t==='city',fs=(city?17:11)/sc;g.font=`bold ${Math.round(fs)}px "Silkscreen",monospace`;
+    const w=g.measureText(r.n).width+10/sc,h=fs*1.45;let box=null;
+    for(const [ox,oy] of [[0,0],[0,1],[0,-1],[0,2],[0,-2],[.6,0],[-.6,0],[.6,1],[-.6,1],[.6,-1],[-.6,-1],[0,3],[0,-3]]){
+      const x=clamp(r.lx+ox*w,WALL+w/2,WW-WALL-w/2),y=clamp(r.ly+oy*h*1.1,WALL+h/2,WH-WALL-h/2),b=[x-w/2,y-h/2,w,h];if(!hit(b)){box=b;break}}
+    if(!box){const x=clamp(r.lx,WALL+w/2,WW-WALL-w/2),y=clamp(r.ly,WALL+h/2,WH-WALL-h/2);box=[x-w/2,y-h/2,w,h]}
+    placed.push(box);const cx=box[0]+w/2,cy=box[1]+h/2;
+    g.fillStyle=city?'rgba(12,11,16,.35)':'rgba(12,11,16,.6)';g.fillRect(box[0],box[1],w,h);
+    g.fillStyle='rgba(12,11,16,.9)';g.fillText(r.n,cx+2/sc,cy+2/sc);g.fillStyle=city?'#f0d36e':'#ece9f5';g.fillText(r.n,cx,cy)}
+  g.textAlign='left';g.textBaseline='alphabetic'}
 function drawMini(){const p=SC.kind==='out'?P:SC.b.door;drawWorldMap(mc,mini.width,mini.height,p.x,p.y,.09,false)}
 function toggleMap(){if(state==='play'){if(invOpen)toggleInv();state='map';pauseStart=performance.now();for(const k in keys)keys[k]=false;mouse.down=false;atkTouch=false;$('mapPanel').hidden=false;renderMap()}
   else if(state==='map'){state='play';stats.paused+=performance.now()-pauseStart;$('mapPanel').hidden=true;lastT=0}}
