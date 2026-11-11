@@ -341,9 +341,9 @@ canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:c
       </div>
       <div class="lbl">Dificuldade</div>
       <div class="diffs">
-        <button class="dbtn" data-d="facil" aria-pressed="true"><b>Fácil</b><span>320 zumbis</span><span>velocidade normal</span></button>
-        <button class="dbtn" data-d="medio" aria-pressed="false"><b>Médio</b><span>480 zumbis</span><span>um pouco rápidos</span></button>
-        <button class="dbtn" data-d="dificil" aria-pressed="false"><b>Difícil</b><span>720 zumbis</span><span>muito rápidos</span></button>
+        <button class="dbtn" data-d="facil" aria-pressed="true"><b>Fácil</b><span>380 zumbis</span><span>velocidade normal</span></button>
+        <button class="dbtn" data-d="medio" aria-pressed="false"><b>Médio</b><span>560 zumbis</span><span>um pouco rápidos</span></button>
+        <button class="dbtn" data-d="dificil" aria-pressed="false"><b>Difícil</b><span>820 zumbis</span><span>muito rápidos</span></button>
       </div>
       <div class="lbl">Modo de jogo</div>
       <div class="modes">
@@ -537,7 +537,7 @@ const WEP={
 };
 const WORDER=['taco_madeira','taco_ferro','facao','machado','machado_bombeiro','pistola','revolver','rifle','metralhadora','shotgun'];
 const BNAME={casa_simples:'Casa simples',casa_madeira:'Cabana de madeira',casa_alvenaria:'Casa de tijolo',casa_moderna:'Casa moderna',casa_grande:'Sobrado',casa_popular:'Casa popular',
-  tenda:'Tenda militar',tenda_cmd:'Tenda de comando',tenda_med:'Tenda médica',padaria:'Padaria',mercado:'Mercado',farmacia:'Farmácia',posto:'Posto de gasolina',oficina:'Oficina mecânica',hospital:'Hospital',ferramentas:'Loja de ferramentas',delegacia:'Delegacia'};
+  tenda:'Tenda militar',tenda_cmd:'Tenda de comando',tenda_med:'Tenda médica',padaria:'Padaria',mercado:'Mercado',farmacia:'Farmácia',posto:'Posto de gasolina',oficina:'Oficina mecânica',hospital:'Hospital',bombeiros:'Corpo de Bombeiros',armaria:'Loja de armas',igreja:'Igreja',ferramentas:'Loja de ferramentas',delegacia:'Delegacia'};
 const SHOP={
   padaria:{barra:40,agua:24,feijoada:10,macarrao:10,energetico:8,curativo:2},
   mercado:{agua:22,feijoada:20,macarrao:20,barra:20,energetico:12,curativo:3,sucata:3},
@@ -551,6 +551,8 @@ const SHOP={
   ferramentas:{madeira:20,pregos:20,martelo:12,chave:12,chapa:10,sucata:8,machado:8,taco_ferro:6,facao:6,capacete:5},
   delegacia:{a9mm:18,a45:14,acart:12,a556:12,a308:6,pistola:8,revolver:7,shotgun:7,rifle:5,curativo:6,taco_ferro:5,colete:5},
   hospital:{kit:14,curativo:30,bandagem:28,pano:22,agua:12,energetico:8,machado_bombeiro:2},
+  bombeiros:{machado_bombeiro:16,capacete:14,bandagem:18,curativo:14,kit:6,agua:14,pano:10,martelo:6,chave:6},
+  armaria:{a9mm:18,a45:14,acart:14,a556:10,a308:8,pistola:8,revolver:7,shotgun:6,rifle:4,colete:4,facao:6},
 };
 const CT={
   FOOD:{agua:30,barra:22,feijoada:18,macarrao:18,energetico:10},
@@ -565,6 +567,7 @@ const CT={
   BOMBEIROS:{machado_bombeiro:40,agua:22,bandagem:16,capacete:12,curativo:10},
   MIL:{kit:30,rifle:14,a556:30,acart:26},
   MED:{kit:28,curativo:30,bandagem:30,agua:10,energetico:6},
+  DOA:{agua:20,barra:18,feijoada:14,macarrao:14,pano:24,bandagem:10,curativo:8},
   AMMO:{a9mm:30,a45:22,acart:18,a556:18,a308:8,curativo:10,colete:3},
 };
 const FK={
@@ -576,7 +579,7 @@ const FK={
   mesa_of:{w:92,h:50,H:30,c:'AMMO',n:'mesa do escritório'},bancada:{w:126,h:36,H:34,c:'SHOP',n:'bancada'},pneus:{w:40,h:40,H:36,n:'pneus'},
   maquina:{w:150,h:60,H:56,n:'máquina'},
   caixa_mil:{w:46,h:30,H:28,c:'MIL',n:'caixa militar'},catre:{w:56,h:96,H:16,c:'BED',n:'cama de campanha'},mesa_mil:{w:96,h:50,H:28,c:'AMMO',n:'mesa de campanha'},radio:{w:52,h:26,H:40,n:'rádio'},maca:{w:58,h:100,H:22,c:'MED',n:'maca'},armario_med:{w:72,h:24,H:70,c:'MED',n:'armário de remédios'},caixa_med:{w:44,h:30,H:26,c:'MED',n:'caixa de primeiros socorros'},
-  planta:{w:28,h:24,H:42,n:'planta'},tapete:{w:120,h:70,H:0,n:'tapete',flat:1},
+  planta:{w:28,h:24,H:42,n:'planta'},banco:{w:150,h:26,H:24,n:'banco'},caixa_doa:{w:44,h:30,H:28,c:'DOA',n:'caixa de doações'},tapete:{w:120,h:70,H:0,n:'tapete',flat:1},
 };
 const HOUSE_A={W:640,H:400,part:[[360,150,250]],items:[['geladeira',20,8],['armario',72,8],['fogao',178,8],['mesa',110,170],['sofa',30,312],['planta',300,10],
   ['tapete',420,150],['cama',540,20],['guarda',380,8],['estante',380,330],['caixa',590,346]]};
@@ -594,6 +597,13 @@ const LAY={
   tenda:{W:520,H:320,items:[['catre',30,10],['catre',110,10],['caixa_mil',300,14],['caixa_mil',352,26],['mesa_mil',230,170],['caixa_mil',440,240]]},
   tenda_med:{W:520,H:320,items:[['maca',30,14],['maca',110,14],['armario_med',230,8],['armario_med',320,8],['caixa_med',440,30],['mesa',220,180],['caixa_med',440,250]]},
   tenda_cmd:{W:700,H:400,items:[['mesa_mil',60,40],['radio',190,12],['caixa_mil',300,14],['caixa_mil',352,20],['arsenal',470,8],['caixa_mil',600,300],['caixa_mil',548,312],['mesa_mil',260,220],['catre',40,260]]},
+  bombeiros:{W:760,H:440,part:[[430,170,280]],items:[['bancada',30,8],['guarda',180,8],['guarda',270,8],['pneus',360,20],['caixa',30,360],['caixa',76,370],['mesa',200,200],
+    ['geladeira',460,8],['armario',512,8],['fogao',618,8],['mesa',500,130],['cama',470,250],['cama',570,250],['cama',670,250]]},
+  armaria:{W:640,H:400,items:[['arsenal',30,8],['arsenal',120,8],['arsenal',210,8],['arquivo',320,8],['mesa_of',440,30],['caixa',560,20],['caixa',560,70],
+    ['vitrine',40,140],['vitrine',190,140],['vitrine',340,140],['balcao',430,280],['planta',30,350]]},
+  igreja:{W:720,H:480,items:[['estante',40,8],['guarda',130,8],['planta',260,14],['mesa',317,40],['planta',440,14],['estante',610,8],
+    ['banco',70,150],['banco',500,150],['banco',70,220],['banco',500,220],['banco',70,290],['banco',500,290],['banco',70,360],['banco',500,360],
+    ['caixa_doa',30,430],['caixa_doa',646,430],['caixa',580,432]]},
   hospital:{W:960,H:520,part:[[340,190,320],[640,190,320]],items:[
     ['maca',20,14],['maca',100,14],['maca',180,14],['armario_med',262,8],['maca',20,380],['maca',100,380],['caixa_med',270,460],['planta',290,380],
     ['planta',366,10],['estante',470,8],['planta',596,10],['balcao',420,150],['mesa',380,330],
@@ -604,7 +614,7 @@ const LAY={
 const ROOMSTYLE={
   casa_simples:{wall:'#d9c7a3',floor:'wood'},casa_popular:{wall:'#f2d46b',floor:'tile',stripe:'#8fc6e0'},casa_madeira:{wall:'#8a5a35',floor:'wood'},casa_alvenaria:{wall:'#c9c5bb',floor:'wood'},casa_moderna:{wall:'#e8e6e0',floor:'tile'},casa_grande:{wall:'#cdb8a0',floor:'wood'},
   mercado:{wall:'#a8553a',floor:'tile',stripe:'#e8e2d0'},padaria:{wall:'#e2b77a',floor:'tile',stripe:'#b8432f'},farmacia:{wall:'#e9efe9',floor:'tile',stripe:'#2f9a4a'},
-  posto:{wall:'#c9c5bb',floor:'tile',stripe:'#c8352b'},oficina:{wall:'#8d8b85',floor:'concrete'},ferramentas:{wall:'#a5573a',floor:'concrete'},delegacia:{wall:'#a7a9ad',floor:'tile',stripe:'#2a3b78'},hospital:{wall:'#e9efe9',floor:'tile',stripe:'#c8352b'},tenda:{wall:'#5f6b3e',floor:'dirt',tent:1},tenda_med:{wall:'#e8e6e0',floor:'tile',tent:1,stripe:'#c8352b'},tenda_cmd:{wall:'#56613a',floor:'dirt',tent:1,stripe:'#3a4426'},fabrica:{wall:'#7f8a8c',floor:'concrete',stripe:'#e5c63a'},
+  posto:{wall:'#c9c5bb',floor:'tile',stripe:'#c8352b'},oficina:{wall:'#8d8b85',floor:'concrete'},ferramentas:{wall:'#a5573a',floor:'concrete'},delegacia:{wall:'#a7a9ad',floor:'tile',stripe:'#2a3b78'},hospital:{wall:'#e9efe9',floor:'tile',stripe:'#c8352b'},bombeiros:{wall:'#a5573a',floor:'concrete',stripe:'#c8352b'},armaria:{wall:'#4a4b52',floor:'tile',stripe:'#e5c63a'},igreja:{wall:'#ece6d4',floor:'wood'},tenda:{wall:'#5f6b3e',floor:'dirt',tent:1},tenda_med:{wall:'#e8e6e0',floor:'tile',tent:1,stripe:'#c8352b'},tenda_cmd:{wall:'#56613a',floor:'dirt',tent:1,stripe:'#3a4426'},fabrica:{wall:'#7f8a8c',floor:'concrete',stripe:'#e5c63a'},
 };
 const FABS={metalurgica:{n:'Metalúrgica',c:'#6f7e8a'},alimentos:{n:'Fábrica de alimentos',c:'#b8784a'},serraria:{n:'Serraria',c:'#8a6440'},textil:{n:'Fábrica têxtil',c:'#7a6a8c'}};
 const DOORX={fabrica:.5,casa_simples:.4,casa_madeira:.33,casa_alvenaria:.38,casa_moderna:.5,casa_grande:.45,padaria:.5,ferramentas:.45,delegacia:.42,mercado:.45,posto:.5,farmacia:.48,oficina:.45};
@@ -630,7 +640,7 @@ const CLOTH={h:{cabeca:'Capuz de lona',corpo:'Camisa e capa',pernas:'Calça carg
 // ================= mapa expandido: praça central com base militar, estações, torres de rádio, fazenda =================
 const OW=6000,OH=4400;
 const PLAZA={x:4480,y:1040,w:1400,h:940},BASE={x:4560,y:1100,w:1240,h:820};
-const STATIONS=[{x:7300,y:1620},{x:7400,y:5300},{x:250,y:6500}];
+const STATIONS=[{x:7300,y:1620},{x:7400,y:5300},{x:250,y:6500},{x:11500,y:5500}];
 const TOWERS=[{x:9100,y:1150},{x:9050,y:6300}];
 const FIELDS=[[1350,4800,1450,600],[2950,4800,1350,600],[4450,4800,1300,600],[1350,5500,1450,560],[2950,5500,1350,560],[4450,5500,1300,560],[1350,6300,1450,700],[2950,6300,2800,700]];
 const BARN={x:3330,y:4520,w:240,h:110};
@@ -763,7 +773,7 @@ function mapExtra(g,sc){g.fillStyle='#c9a64a';for(const f of FIELDS)g.fillRect(f
   for(const S of STATIONS)g.fillRect(S.x,S.y,500,500);g.fillStyle='#a8352a';g.fillRect(BARN.x,BARN.y,BARN.w,BARN.h);g.fillStyle='#c8352b';for(const T of TOWERS){g.beginPath();g.arc(T.x,T.y,Math.max(40,8/sc),0,6.28);g.fill()}}
 
 // ================= mundo =================
-const WW=9600,WH=7200,WALL=64,RW=96;
+const WW=12800,WH=9600,WALL=64,RW=96;
 const HY=[700,1500,2300],VX=[1250,2250,3250,4250],IHY=[900,1500,2300],IVX=5000;
 const LAKE={x:1700,y:3080,rx:470,ry:250};
 const UX=5600,UY=4080,URAD=230;
@@ -777,13 +787,15 @@ const REG=[
   {n:'PRAÇA CENTRAL · BASE MILITAR',lx:5180,ly:1530,c:null,rects:[]},{n:'FAZENDA',lx:3500,ly:5440,c:null,rects:[]},
   {n:'ESTAÇÃO MILITAR',lx:7550,ly:1590,c:null,rects:[]},{n:'ESTAÇÃO MILITAR',lx:7650,ly:5270,c:null,rects:[]},{n:'ESTAÇÃO MILITAR',lx:760,ly:6450,c:null,rects:[]},
   {n:'TORRE DE RÁDIO',lx:8850,ly:800,c:null,rects:[]},{n:'TORRE DE RÁDIO',lx:8800,ly:5950,c:null,rects:[]},{n:'ZONA LESTE',lx:8000,ly:4400,c:null,rects:[]},{n:'HOSPITAL',lx:7260,ly:1000,c:null,rects:[]},
+  {n:'BAIRRO NOVO',lx:11150,ly:420,c:null,rects:[]},{n:'ZONA INDUSTRIAL',lx:10700,ly:2700,c:null,rects:[]},{n:'ESTAÇÃO MILITAR',lx:11750,ly:5470,c:null,rects:[]},
+  {n:'VILA DO SUL',lx:4300,ly:7180,c:null,rects:[]},{n:'DISTRITO INDUSTRIAL',lx:10900,ly:7950,c:null,rects:[]},{n:'FLORESTA DO SUL',lx:6400,ly:9150,c:null,rects:[]},
 ];
 let seed=1;function rnd(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}
 const R=(a,b)=>a+rnd()*(b-a),clamp=(v,a,b)=>v<a?a:v>b?b:v,dist=(a,b,c,d)=>Math.hypot(a-c,b-d);
 function pick(t){let s=0;for(const k in t)s+=t[k];let r=Math.random()*s;for(const k in t){r-=t[k];if(r<=0)return k}return Object.keys(t)[0]}
 
 let OUT,SC,buildings,trees,bushes,lamps,cars,tufts,roads,bueiros,A,B,FX,P,trader,pets,stats,state='menu',invOpen=false,invHover=false,charSel='h',diffSel='facil';
-const DIFF={facil:{n:320,v:1,t:'Fácil'},medio:{n:480,v:1.25,t:'Médio'},dificil:{n:720,v:1.7,t:'Difícil'}};
+const DIFF={facil:{n:380,v:1,t:'Fácil'},medio:{n:560,v:1.25,t:'Médio'},dificil:{n:820,v:1.7,t:'Difícil'}};
 // fábricas desenhadas em volume (fachada, telhado em serra, chaminé)
 for(const k in FABS){const c=document.createElement('canvas');c.width=440;c.height=330;const g=c.getContext('2d');const col=FABS[k].c;
   g.fillStyle='#55534d';g.fillRect(14,300,412,24);
@@ -800,7 +812,7 @@ for(const k in FABS){const c=document.createElement('canvas');c.width=440;c.heig
 
 // ================= casas desenhadas (fachada + telhado em 3/4) =================
 const HM={};const HVAR=3;
-const SHOP_TYPES=['padaria','mercado','farmacia','posto','oficina','ferramentas','delegacia','hospital'];
+const SHOP_TYPES=['padaria','mercado','farmacia','posto','oficina','ferramentas','delegacia','hospital','bombeiros','armaria','igreja'];
 const HOUSE_TYPES=['casa_simples','casa_madeira','casa_alvenaria','casa_moderna','casa_grande','casa_popular'];
 (function(){
   let hs=7;const hr=()=>{hs=(hs*9301+49297)%233280;return hs/233280};
@@ -974,6 +986,36 @@ const HOUSE_TYPES=['casa_simples','casa_madeira','casa_alvenaria','casa_moderna'
       dx=Math.round(W/2);glassDoor(g,dx-32,FL-62,64,58);R(g,dx-46,FL-2,92,4,'#d9d6cc');R(g,dx-38,FL-6,76,4,'#c9c5bb');
       plant(g,cx0-26,FL,1);plant(g,cx0+cw+26,FL,1);
       R(g,W-60,FL-52,40,20,OL);R(g,W-59,FL-51,38,18,'#1f1d29');g.fillStyle='#ff6a5a';g.font='bold 8px monospace';g.fillText('PRONTO',W-56,FL-43);g.fillText('SOCORRO',W-58,FL-35)}
+    else if(type==='bombeiros'){W=430;const RD=58,T=64;H=T+RD+150;[c,g]=mk(W,H);const wt=T+RD,FL=H-6;
+      flatRoof(g,6,T,W-104,RD,'#8d8b85');ac(g,40,T+16);ac(g,170,T+18);
+      R(g,W-98,6,66,wt-4,OL);bricks(g,W-96,8,62,wt-6,'#a8352a');for(const y of [18,52,86])win(g,W-84,y,38,20,{frame:'#d9d6cc',glass:'#5d7f96'});R(g,W-100,4,70,6,'#6d6f74');
+      R(g,4,wt-2,W-8,FL-wt+2,OL);bricks(g,6,wt,W-12,FL-wt,'#b33a2c');shadowEave(g,6,wt,W-12);
+      sign(g,24,wt+8,W-150,22,'#ecebe4','#c8352b','BOMBEIROS',15);
+      {const cx=W-84,cy=wt+20;g.fillStyle=OL;g.beginPath();g.arc(cx,cy,15,0,6.28);g.fill();g.fillStyle='#e5c63a';g.beginPath();g.arc(cx,cy,13,0,6.28);g.fill();g.fillStyle='#c8352b';g.beginPath();g.moveTo(cx,cy-9);g.lineTo(cx+7,cy+6);g.lineTo(cx-7,cy+6);g.fill()}
+      for(const gx of [20,182]){const gw=150,gy=wt+40;R(g,gx-3,gy-3,gw+6,FL-gy+3,OL);R(g,gx,gy,gw,FL-gy,'#d9d6cc');for(let y=gy+4;y<FL;y+=8)R(g,gx,y,gw,2,'#b9b6ac');
+        R(g,gx+6,gy+18,gw-12,16,'#5d7f96');for(let k=1;k<4;k++)R(g,gx+6+k*(gw-12)/4,gy+18,2,16,'#d9d6cc');R(g,gx,gy-8,gw,5,'#c8352b')}
+      dx=Math.round(W-48);door(g,dx-14,FL-54,28,48,'#c8352b',{frame:'#d9d6cc'});R(g,dx-20,FL-62,40,5,OL)}
+    else if(type==='armaria'){W=330;const RD=56,T=18;H=T+RD+120;[c,g]=mk(W,H);const wt=T+RD,FL=H-6;
+      flatRoof(g,6,T,W-12,RD,'#77756f');ac(g,W-80,T+14);
+      R(g,4,wt-2,W-8,FL-wt+2,OL);R(g,6,wt,W-12,FL-wt,'#4a4b52');for(let y=wt+6;y<FL;y+=10)R(g,6,y,W-12,1,'#3e3f45');R(g,6,wt,W-12,5,'rgba(0,0,0,.3)');
+      R(g,18,wt+10,W-36,28,OL);R(g,20,wt+12,W-40,24,'#16151a');g.fillStyle='#e5c63a';g.font='bold 14px monospace';g.textAlign='center';g.fillText('ARMAS & MUNIÇÃO',W/2+14,wt+29);g.textAlign='left';
+      R(g,28,wt+17,24,6,'#c9c5bb');R(g,28,wt+23,8,10,'#c9c5bb');R(g,40,wt+23,4,4,'#c9c5bb');R(g,50,wt+18,3,2,'#16151a');
+      for(const x of [22,W-114])win(g,x,wt+54,92,42,{frame:'#2b2c31',glass:'#3a4a56',bars:1});
+      dx=Math.round(W/2);door(g,dx-15,FL-58,30,52,'#2b2c31',{frame:'#77756f'});R(g,dx-24,FL-68,48,6,'#c8352b');R(g,dx+24,FL-40,10,14,OL);R(g,dx+25,FL-39,8,12,'#9be33a')}
+    else if(type==='igreja'){W=300;const T=124,RD=40;H=T+RD+150;[c,g]=mk(W,H);const wt=T+RD,FL=H-6,cx=W/2;
+      g.fillStyle=OL;g.beginPath();g.moveTo(2,wt+2);g.lineTo(26,T-2);g.lineTo(W-26,T-2);g.lineTo(W-2,wt+2);g.fill();
+      for(let y=T;y<wt;y++){const k=(y-T)/RD,ix=24*(1-k);R(g,4+ix,y,W-8-ix*2,1,y%6<3?'#8a3a2a':'#7a3224')}
+      R(g,cx-27,36,54,wt-34,OL);R(g,cx-25,38,50,wt-36,'#e8e2d0');R(g,cx-25,38,7,wt-36,'#d4cdb8');
+      g.fillStyle=OL;g.beginPath();g.moveTo(cx-32,40);g.lineTo(cx,10);g.lineTo(cx+32,40);g.fill();g.fillStyle='#8a3a2a';g.beginPath();g.moveTo(cx-28,38);g.lineTo(cx,14);g.lineTo(cx+28,38);g.fill();
+      R(g,cx-1,0,3,14,'#e5c63a');R(g,cx-5,3,11,3,'#e5c63a');
+      R(g,cx-11,54,22,30,OL);R(g,cx-9,56,18,28,'#2b2622');g.fillStyle='#c9a24a';g.beginPath();g.arc(cx,72,7,Math.PI,0);g.fill();R(g,cx-7,72,14,4,'#c9a24a');
+      for(const y of [100,130])win(g,cx-8,y,16,18,{frame:'#d4cdb8',glass:'#3a5a8c'});
+      R(g,4,wt-2,W-8,FL-wt+2,OL);R(g,6,wt,W-12,FL-wt,'#ece6d4');R(g,6,wt,W-12,5,'rgba(0,0,0,.2)');for(let y=wt+12;y<FL;y+=14)R(g,6,y,W-12,1,'#d9d2bc');
+      for(const x of [24,W-60]){R(g,x,wt+22,36,64,OL);R(g,x+2,wt+24,32,60,'#3a5a8c');R(g,x+2,wt+24,16,30,'#c8352b');R(g,x+18,wt+54,16,30,'#e5c63a');R(g,x+18,wt+24,16,30,'#2f9a4a');R(g,x+2,wt+54,16,30,'#6a4c8c');R(g,x+17,wt+24,2,60,OL);R(g,x+2,wt+53,32,2,OL)}
+      g.fillStyle=OL;g.beginPath();g.arc(cx,wt+34,17,0,6.28);g.fill();g.fillStyle='#c8352b';g.beginPath();g.arc(cx,wt+34,14,0,6.28);g.fill();g.fillStyle='#e5c63a';g.beginPath();g.arc(cx,wt+34,6,0,6.28);g.fill();
+      for(let i=0;i<8;i++){const a=i*Math.PI/4;R(g,cx+Math.cos(a)*10-1,wt+34+Math.sin(a)*10-1,2,2,'#3a5a8c')}
+      dx=Math.round(cx);g.fillStyle=OL;g.beginPath();g.arc(dx,FL-58,22,Math.PI,0);g.fill();R(g,dx-22,FL-58,44,58,OL);g.fillStyle='#6d4a2c';g.beginPath();g.arc(dx,FL-58,19,Math.PI,0);g.fill();R(g,dx-19,FL-58,38,56,'#6d4a2c');R(g,dx-1,FL-76,2,74,'#4a3424');R(g,dx-8,FL-30,3,6,'#c9a24a');R(g,dx+5,FL-30,3,6,'#c9a24a');
+      R(g,dx-34,FL-2,68,4,'#c9c5bb');plant(g,30,FL,1);plant(g,W-30,FL,1)}
     else{// delegacia
       W=350;const RD=52,T=40;H=T+RD+160;[c,g]=mk(W,H);const wt=T+RD;
       flatRoof(g,6,T,W-12,RD,'#8d8f94');waterTank(g,W-70,T-30);R(g,40,T+10,30,8,OL);R(g,41,T+11,14,6,'#e33a3a');R(g,55,T+11,14,6,'#3a5ae3');
@@ -1022,12 +1064,26 @@ function genWorld(){
   roads.push({x:6852,y:852,w:96,h:6200,k:'a',d:'v'},{x:5952,y:2348,w:96,h:2304,k:'a',d:'v'},{x:1240,y:4652,w:WW-WALL-1240,h:96,k:'a',d:'h'},{x:5800,y:3610,w:152,h:80,k:'t',d:'h'},
     {x:8502,y:1548,w:96,h:3104,k:'a',d:'v'},{x:WALL,y:6160,w:6852-WALL,h:80,k:'t',d:'h'},{x:2860,y:4748,w:80,h:1412,k:'t',d:'v'});
   const fh=['casa_madeira','casa_simples','casa_madeira','casa_madeira'];qi=0;row(4652-14,1300,2800,fh,[90,180]);
-  const eh=[];for(let i=0;i<16;i++){const r=rnd();eh.push(r<.35?'casa_simples':r<.6?'casa_alvenaria':r<.8?'casa_popular':'casa_moderna')}qi=0;row(4652-14,7020,8440,eh,[60,140]);row(4652-14,8660,WW-WALL-30,eh,[60,140]);row(4652-14,4100,5900,eh,[70,160]);
+  const eh=[];for(let i=0;i<16;i++){const r=rnd();eh.push(r<.35?'casa_simples':r<.6?'casa_alvenaria':r<.8?'casa_popular':'casa_moderna')}qi=0;row(4652-14,7020,8440,eh,[60,140]);row(4652-14,8660,9506,eh,[60,140]);row(4652-14,4100,5900,eh,[70,160]);
   qi=0;row(1452-14,6990,7700,['hospital'],[0,0]);
+  // ===== mapa ampliado: Bairro Novo e Zona Industrial (leste), Vila do Sul e Distrito Industrial (sul) =====
+  roads.push({x:10500,y:948,w:96,h:3704,k:'a',d:'v'},{x:11700,y:948,w:96,h:2648,k:'a',d:'v'},{x:8598,y:3500,w:WW-WALL-8598,h:96,k:'a',d:'h'},{x:10500,y:4748,w:96,h:2852,k:'a',d:'v'},
+    {x:WALL,y:7600,w:WW-WALL*2,h:96,k:'a',d:'h'},{x:WALL,y:8600,w:WW-WALL*2,h:96,k:'a',d:'h'},{x:6852,y:7052,w:96,h:548,k:'a',d:'v'},{x:2860,y:6240,w:80,h:1360,k:'t',d:'v'},
+    {x:4000,y:7696,w:96,h:904,k:'a',d:'v'},{x:9000,y:7696,w:96,h:904,k:'a',d:'v'},{x:11500,y:7696,w:96,h:904,k:'a',d:'v'});
+  const mixQ=(n,shops,every)=>{const q=[];for(let i=0;i<n;i++)q.push(ht[Math.floor(rnd()*ht.length)]);shops.forEach((s,i)=>q.splice(1+i*every,0,s));return q};
+  const fabQ=n=>{const f=['fab_metalurgica','fab_alimentos','fab_serraria','fab_textil'],q=[];for(let i=0;i<n;i++)q.push(f[Math.floor(rnd()*4)]);return q};
+  let nq=mixQ(40,['bombeiros','mercado','igreja','farmacia','armaria','padaria','posto','oficina','ferramentas','delegacia'],2);qi=0;
+  for(const y of [852,1452,2252])for(const [a,b] of [[9650,10440],[10650,11640],[11850,12680]])row(y-14,a,b,nq,[40,90]);
+  nq=fabQ(20);qi=0;for(const [a,b] of [[8700,10440],[10650,11640],[11850,12680]])row(3500-14,a,b,nq,[40,90]);for(const [a,b] of [[9650,10440],[10650,12680]])row(4652-14,a,b,nq,[40,90]);
+  nq=mixQ(70,['igreja','mercado','armaria','padaria','bombeiros','farmacia','oficina','posto','igreja','ferramentas','delegacia','mercado','farmacia'],3);qi=0;
+  for(const [a,b] of [[1300,2820],[2980,6800],[6990,10440],[10650,12680]])row(7600-14,a,b,nq,[40,110]);
+  for(const [a,b] of [[1300,3960],[4140,8960]])row(8600-14,a,b,nq,[40,110]);
+  nq=fabQ(10);qi=0;for(const [a,b] of [[9140,11460],[11640,12680]])row(8600-14,a,b,nq,[50,100]);
   // postes
   const nearDoor=x=>buildings.some(b=>Math.abs(b.door.x-x)<34);
   for(const y of HY)for(let x=VX[0]+130;x<VX[3];x+=260){if(VX.some(v=>Math.abs(v-x)<100))continue;if(!nearDoor(x))lamps.push({x,y:y-48-8});lamps.push({x:x+130,y:y+48+12})}
-  for(let x=VX[3]+200;x<WW-120;x+=300){if(x>4380&&x<5900)continue;lamps.push({x,y:1452-8});lamps.push({x:x+150,y:1548+12})}
+  for(let x=VX[3]+200;x<WW-120;x+=300){if(x>4380&&x<5900)continue;if(!nearDoor(x))lamps.push({x,y:1452-8});lamps.push({x:x+150,y:1548+12})}
+  for(const yy of [3500,7600,8600])for(let x=yy===3500?8750:300;x<WW-120;x+=300){if(roads.some(r=>r.d==='v'&&r.k==='a'&&Math.abs(r.x+48-x)<90&&yy>=r.y-100&&yy<=r.y+r.h+100))continue;if(!nearDoor(x))lamps.push({x,y:yy-8});lamps.push({x:x+150,y:yy+96+12})}
   for(const l of lamps)OUT.solids.push({x:l.x-4,y:l.y-4,w:8,h:8,low:1});
   // carros
   const addCar=(type,x,y,d)=>{const C=CARS[type];const w=d==='h'?C.w:C.h,h=d==='h'?C.h:C.w;const c={type,x:x-w/2,y:y-h/2,w,h,d,face:rnd()<.5?1:-1,color:['#8c2f2a','#3a5a8c','#7a7a74','#d9d6cc','#4f6234','#c9a24a'][Math.floor(rnd()*6)],done:false,seed:rnd(),broken:rnd()<.7};
@@ -1035,23 +1091,26 @@ function genWorld(){
   const randType=()=>{const r=rnd();return r<.72?'carro':r<.84?'viatura':r<.95?'ambulancia':'bombeiros'};
   for(const y of HY)for(let i=0;i<6;i++){const x=R(VX[0]+60,VX[3]-60);if(VX.some(v=>Math.abs(v-x)<120))continue;addCar(randType(),x,y+(rnd()<.5?-22:22),'h')}
   for(const x of VX)for(let i=0;i<3;i++){const y=R(300,2300);if(HY.some(h=>Math.abs(h-y)<120))continue;addCar(randType(),x+(rnd()<.5?-22:22),y,'v')}
-  for(const b of buildings){if(b.ty==='delegacia')addCar('viatura',b.door.x+60,b.roadTop+30,'h');if(b.ty==='farmacia')addCar('ambulancia',b.door.x+80,b.roadTop+30,'h');if(b.ty==='hospital'){addCar('ambulancia',b.door.x-150,b.roadTop+26,'h');addCar('ambulancia',b.door.x+150,b.roadTop+26,'h')}}
+  for(const b of buildings){if(b.ty==='delegacia')addCar('viatura',b.door.x+60,b.roadTop+30,'h');if(b.ty==='farmacia')addCar('ambulancia',b.door.x+80,b.roadTop+30,'h');if(b.ty==='hospital'){addCar('ambulancia',b.door.x-150,b.roadTop+26,'h');addCar('ambulancia',b.door.x+150,b.roadTop+26,'h')}if(b.ty==='bombeiros')addCar('bombeiros',b.door.x-170,b.roadTop+30,'h');if(b.ty==='armaria')addCar('viatura',b.door.x+90,b.roadTop+30,'h')}
   addCar('bombeiros',R(VX[1]+150,VX[2]-150),HY[1]+24,'h');
   genExtra(addCar);
   for(let i=0;i<6;i++)addCar('carro',R(5950,WW-200),1500+(rnd()<.5?-22:22),'h');
   for(let i=0;i<4;i++)addCar('carro',R(1400,5300),3650,'h');
+  {const rt2=()=>{const r=rnd();return r<.8?'carro':r<.9?'viatura':'ambulancia'};
+   for(const yy of [3500,7600,8600])for(let i=0;i<7;i++)addCar(rt2(),R(yy===3500?8800:400,WW-300),yy+48+(rnd()<.5?-22:22),'h');
+   for(const xx of [10500,11700])for(let i=0;i<3;i++)addCar(rt2(),xx+48+(rnd()<.5?-22:22),R(1100,3400),'v')}
   // lago, árvores, arbustos, grama
   const blocked=(x,y,pad)=>{for(const r of roads)if(x>r.x-pad&&x<r.x+r.w+pad&&y>r.y-pad&&y<r.y+r.h+pad)return true;
     for(const b of buildings)if(x>b.x-10&&x<b.x+b.w+10&&y>b.y+b.h*.3&&y<b.door.y+30)return true;
     if(inLake(x,y,40))return true;if(dist(x,y,UX,UY)<URAD+30)return true;for(const z of NOPLANT)if(x>z[0]-pad&&x<z[0]+z[2]+pad&&y>z[1]-pad&&y<z[1]+z[3]+pad)return true;for(const c of cars)if(x>c.x-20&&x<c.x+c.w+20&&y>c.y-20&&y<c.y+c.h+20)return true;return false};
   const plant=(rx,ry,rw,rh,n,pine)=>{for(let i=0;i<n;i++){const x=R(rx,rx+rw),y=R(ry,ry+rh);if(blocked(x,y,26))continue;const t={x,y,s:R(.8,1.3),v:rnd()<pine?0:1,c:Math.floor(rnd()*3)};trees.push(t)}};
-  plant(WALL+20,WALL+20,1080,WH-WALL*2-40,560,.6);plant(WALL+20,3770,3150,560,300,.55);
+  plant(WALL+20,WALL+20,1080,WH-WALL*2-40,760,.6);plant(WALL+20,3770,3150,560,300,.55);
   plant(1250,2450,3700,1150,170,.3);plant(4400,2450,1500,1150,90,.4);plant(1180,250,3150,2150,60,.1);
-  plant(WALL+20,4400,1200,WH-4400-WALL-20,300,.6);plant(6100,300,3400,WH-400,520,.45);plant(1300,4750,4500,2350,70,.3);plant(3300,3780,2600,600,60,.4);
+  plant(WALL+20,4400,1200,WH-4400-WALL-20,300,.6);plant(6100,300,3400,6800,520,.45);plant(9650,300,3050,4400,140,.35);plant(9650,4750,3050,2800,420,.5);plant(1300,7700,11300,600,240,.4);plant(WALL+20,8700,WW-WALL*2-40,820,620,.55);plant(1300,4750,4500,2350,70,.3);plant(3300,3780,2600,600,60,.4);
   for(const t of trees)OUT.solids.push({x:t.x-6,y:t.y-4,w:12,h:8,low:1});
-  for(let i=0;i<3900;i++){const x=R(WALL,WW-WALL),y=R(WALL,WH-WALL);if(blocked(x,y,6))continue;bushes.push({x,y,s:R(.7,1.3),c:Math.floor(rnd()*3),f:rnd()<.15})}
-  tufts=[];for(let i=0;i<22000;i++){const x=R(WALL,WW-WALL),y=R(WALL,WH-WALL);if(onRoad(x,y)||inLake(x,y,0))continue;tufts.push({x,y,c:rnd()<.5?'#56713a':'#3b5229',w:R(2,5)})}
-  bueiros=[{x:1700,y:HY[1]},{x:2700,y:HY[0]},{x:3700,y:HY[2]},{x:VX[1],y:1100},{x:4380,y:1500},{x:3000,y:3650},{x:6900,y:3000},{x:2900,y:5800},{x:8550,y:4000},{x:6900,y:6400}];
+  for(let i=0;i<6900;i++){const x=R(WALL,WW-WALL),y=R(WALL,WH-WALL);if(blocked(x,y,6))continue;bushes.push({x,y,s:R(.7,1.3),c:Math.floor(rnd()*3),f:rnd()<.15})}
+  tufts=[];for(let i=0;i<39000;i++){const x=R(WALL,WW-WALL),y=R(WALL,WH-WALL);if(onRoad(x,y)||inLake(x,y,0))continue;tufts.push({x,y,c:rnd()<.5?'#56713a':'#3b5229',w:R(2,5)})}
+  bueiros=[{x:1700,y:HY[1]},{x:2700,y:HY[0]},{x:3700,y:HY[2]},{x:VX[1],y:1100},{x:4380,y:1500},{x:3000,y:3650},{x:6900,y:3000},{x:2900,y:5800},{x:8550,y:4000},{x:6900,y:6400},{x:11100,y:1500},{x:10548,y:3000},{x:11000,y:3548},{x:4048,y:8150},{x:7500,y:7648},{x:10200,y:8648}];
   buildGrid(OUT);
   let zin=0;for(const b of buildings){genInterior(b);zin+=b.zin}
   return zin}
@@ -1070,7 +1129,7 @@ function genInterior(b){
     if(F.c&&b.house&&Math.random()<.12)f.c=null;
     I.furn.push(f);if(!F.flat)I.solids.push({x,y,w:F.w,h:F.h,low:1})}
   b.int=I;const ri=(a,n)=>a+Math.floor(Math.random()*n);
-  b.zin=b.ty==='fabrica'?ri(3,3):b.house?(b.ty==='casa_grande'||b.ty==='casa_moderna'?ri(1,3):b.roadTop>3000?ri(0,2):ri(0,3)):b.ty==='delegacia'?ri(3,2):b.ty==='hospital'?ri(4,3):b.ty==='mercado'?ri(2,3):ri(1,3);
+  b.zin=b.ty==='fabrica'?ri(3,3):b.house?(b.ty==='casa_grande'||b.ty==='casa_moderna'?ri(1,3):b.roadTop>3000?ri(0,2):ri(0,3)):b.ty==='delegacia'?ri(3,2):b.ty==='hospital'?ri(4,3):b.ty==='armaria'?ri(3,2):b.ty==='mercado'?ri(2,3):ri(1,3);
   b.left=I.furn.filter(f=>f.c).length}
 function spawnInteriorZombies(){for(const b of buildings){const I=b.int;for(let i=0;i<b.zin;i++){const [x,y]=freeSpot(I,{inner:1});const r=Math.random();I.Z.push(mkZ(b.mil?'zmil':r<.15?'z3':r<.4?'z2':'z1',x,y))}}}
 function mkZ(t,x,y){return{t,x,y,r:10,hp:ZT[t].hp,max:ZT[t].hp,face:1,anim:Math.random()*4,state:'wander',tx:x,ty:y,wt:0,hit:0,atk:0,alert:0}}
@@ -1100,6 +1159,8 @@ function newGameCore(){
     {n:5,o:{rect:[WALL+40,WALL+40,1050,WH-200]},mix:[.1,.2]},
     {n:70,o:{rect:[6100,300,3350,6700]},mix:[.15,.25]},{n:34,o:{rect:[1300,4750,4450,2300]},mix:[.1,.2]},
     {n:28,o:{rect:[BASE.x+30,BASE.y+30,BASE.w-60,BASE.h-60]},type:'zmil'},
+    {n:60,o:{rect:[9650,300,3050,2100]},mix:[.15,.3]},{n:40,o:{rect:[8650,2400,4050,2250]},mix:[.2,.25]},
+    {n:30,o:{rect:[9650,4750,3050,2800]},mix:[.15,.25]},{n:60,o:{rect:[1300,7250,11350,1350]},mix:[.12,.25]},{n:20,o:{rect:[WALL+40,8700,WW-200,760]},mix:[.1,.2]},
     ...STATIONS.map(S=>({n:10,o:{rect:[S.x+40,S.y+40,420,420]},type:'zmil'})),
   ];
   {const outT=DF.n-intN,base=groups.reduce((q,g)=>q+g.n,0);let acc=0;groups.forEach((g,i)=>{g.n=i<groups.length-1?Math.round(g.n*outT/base):outT-acc;acc+=g.n})}
@@ -1111,6 +1172,8 @@ function newGameCore(){
   spawnA('cervo',3,south);spawnA('lobo',2,south);spawnA('urso',1,south);spawnA('coelho',3,south);
   spawnA('galinha',8,farm);spawnA('ovelha',5,farm);spawnA('vaca',4,farm);spawnA('cavalo',3,farm);spawnA('coelho',3,farm);spawnA('cao',2,farm);spawnA('gato',2,farm);
   {const fz={rect:[1300,4750,4450,2300]},ez={rect:[6100,300,3350,6700]};spawnA('vaca',6,fz);spawnA('galinha',10,fz);spawnA('ovelha',6,fz);spawnA('cavalo',3,fz);spawnA('corvo',8,fz);spawnA('coelho',5,fz);spawnA('cervo',6,ez);spawnA('lobo',5,ez);spawnA('javali',4,ez);spawnA('raposa',3,ez);spawnA('urso',1,ez)}
+  {const sf={rect:[WALL+40,8700,WW-200,760]},ef={rect:[9650,4750,3050,2800]};spawnA('cervo',6,sf);spawnA('lobo',5,sf);spawnA('javali',4,sf);spawnA('urso',2,sf);spawnA('coelho',5,sf);spawnA('raposa',3,sf);
+   spawnA('cervo',4,ef);spawnA('lobo',4,ef);spawnA('javali',3,ef);spawnA('urso',1,ef);spawnA('corvo',4,ef)}
   spawnA('rato',6,city);spawnA('corvo',5,city);spawnA('gato',1,city);
   spawnA('cao',1,{near:[P.x+300,P.y-140],rad:120});spawnA('gato',1,{near:[P.x+220,P.y+170],rad:100});
   trader={x:bueiros[0].x+120,y:bueiros[0].y-26,face:-1,anim:0,tx:0,ty:0,hx:bueiros[0].x+120,hy:bueiros[0].y-26};
@@ -2261,6 +2324,8 @@ function drawFurn(f){
       else{ctx.fillStyle='#e8e4d8';ctx.beginPath();ctx.arc(x+w*.3,y-H+h/2,7,0,6.28);ctx.fill();ctx.fillStyle='#6d4a2c';ctx.fillRect(x-10,y+8,10,16);ctx.fillRect(x+w,y+8,10,16)}break}
     case 'cama':box3(x,y,w,h,H,r<.5?'#5b7fa6':'#a64f4f','#5e412a');ctx.fillStyle='#ecebe4';ctx.fillRect(x+6,y-H+4,w-12,18);ctx.fillStyle='rgba(255,255,255,.18)';ctx.fillRect(x,y-H+28,w,6);ctx.fillStyle='#4a3424';ctx.fillRect(x,y-H-8,w,10);break;
     case 'guarda':box3(x,y,w,h,H,'#5e412a','#6d4a2c');ctx.fillStyle='#4a3424';ctx.fillRect(x+w/2-1,y+h-H+4,2,H-6);ctx.fillStyle='#c9b48a';ctx.fillRect(x+w/2-6,y+h-H+H/2,3,8);ctx.fillRect(x+w/2+3,y+h-H+H/2,3,8);break;
+    case 'banco':box3(x,y,w,h,H,'#8a5a35','#6d4a2c');ctx.fillStyle='#5e412a';ctx.fillRect(x,y-H-12,w,12);ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(x,y-H-12,w,2);ctx.fillStyle='#4a3424';ctx.fillRect(x+4,y+h-H,4,H);ctx.fillRect(x+w-8,y+h-H,4,H);break;
+    case 'caixa_doa':box3(x,y,w,h,H,'#c8a26a','#b08a55');ctx.fillStyle='#8a6a40';ctx.fillRect(x,y-H+h/2-1,w,2);ctx.fillStyle='#ecebe4';ctx.fillRect(x+8,y+h-H+8,w-16,10);ctx.fillStyle='#c8352b';ctx.fillRect(x+w/2-4,y+h-H+10,8,6);break;
     case 'sofa':box3(x,y,w,h,H,r<.5?'#6a7d4e':'#7a4e6a','#58673f');ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(x+w/3,y-H+4,2,h-4);ctx.fillRect(x+2*w/3,y-H+4,2,h-4);ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(x,y-H-10,w,12);break;
     case 'tv':box3(x,y,w,h,H*.5,'#4a3424','#5e412a');ctx.fillStyle='#111';ctx.fillRect(x+6,y-H-10,w-12,30);ctx.fillStyle='#22303a';ctx.fillRect(x+9,y-H-7,w-18,24);break;
     case 'estante':box3(x,y,w,h,H,'#5e412a','#6d4a2c');for(let s=0;s<3;s++){const yy=y+h-H+6+s*22;ctx.fillStyle='#4a3424';ctx.fillRect(x+3,yy+16,w-6,3);for(let i=0;i<6;i++){ctx.fillStyle=['#a64f4f','#5b7fa6','#c9a24a','#6a7d4e'][(i+s+Math.floor(r*4))%4];ctx.fillRect(x+6+i*10,yy+2,7,14)}}break;
