@@ -1950,7 +1950,7 @@ function drawOutside(v){
     ctx.fillStyle='#6d4a2c';ctx.fillRect(LAKE.x+LAKE.rx-60,LAKE.y+LAKE.ry-24,90,14);ctx.fillStyle='#5e412a';for(let i=0;i<6;i++)ctx.fillRect(LAKE.x+LAKE.rx-56+i*15,LAKE.y+LAKE.ry-24,2,14)}
   // ruas com calçada elevada e meio-fio
   for(const r of roads)if(r.k==='a'&&vis(r.x-18,r.y-18,r.w+36,r.h+36)){ctx.fillStyle='#a19d90';ctx.fillRect(r.x-16,r.y-16,r.w+32,r.h+32);ctx.fillStyle='#8f8b7f';
-    if(r.d==='h'){for(let x=Math.max(r.x,L-40);x<Math.min(r.x+r.w,Rr);x+=32){ctx.fillRect(x,r.y-16,1,16);ctx.fillRect(x,r.y+r.h,1,16)}}else{for(let y=Math.max(r.y,T-40);y<Math.min(r.y+r.h,Bt);y+=32){ctx.fillRect(r.x-16,y,16,1);ctx.fillRect(r.x+r.w,y,16,1)}}}
+    if(r.d==='h'){for(let x=r.x+Math.max(0,Math.floor((L-40-r.x)/32))*32;x<Math.min(r.x+r.w,Rr);x+=32){ctx.fillRect(x,r.y-16,1,16);ctx.fillRect(x,r.y+r.h,1,16)}}else{for(let y=r.y+Math.max(0,Math.floor((T-40-r.y)/32))*32;y<Math.min(r.y+r.h,Bt);y+=32){ctx.fillRect(r.x-16,y,16,1);ctx.fillRect(r.x+r.w,y,16,1)}}}
   for(const r of roads){if(!vis(r.x,r.y,r.w,r.h))continue;
     if(r.k==='a'){ctx.fillStyle='#38393f';ctx.fillRect(r.x,r.y,r.w,r.h);ctx.fillStyle='#6f6c63';if(r.d==='h')ctx.fillRect(r.x,r.y,r.w,5);else{ctx.fillRect(r.x,r.y,4,r.h)}ctx.fillStyle='rgba(0,0,0,.25)';if(r.d==='h')ctx.fillRect(r.x,r.y+5,r.w,4);else ctx.fillRect(r.x+4,r.y,4,r.h);
       ctx.fillStyle='#d6d2c4';if(r.d==='h')ctx.fillRect(r.x,r.y+r.h,r.w,2);else ctx.fillRect(r.x+r.w-2,r.y,2,r.h)}
