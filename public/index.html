@@ -2766,7 +2766,7 @@ function readPeer(peer,rp){const pr=peer.presence||{};
   const p=pr.p;
   if(p&&typeof p==='object'){const num=v=>typeof v==='number'&&isFinite(v)?v:0;
     const sc=typeof p.s==='string'?p.s:'o';if(sc!==rp.sc){rp.x=null}rp.sc=sc;rp.tx=num(p.x);rp.ty=num(p.y);rp.a=num(p.a);const f=num(p.f);
-    rp.tz=num(p.z);rp.moving=!!(f&1);rp.run=!!(f&2);rp.crouch=!!(f&4);rp.dead=!!(f&8);rp.face=f&16?-1:1;rp.hp=num(p.h);
+    rp.tz=num(p.z);rp.moving=!!(f&1);rp.run=!!(f&2);rp.crouch=!!(f&4);rp.dead=!!(f&8);rp.face=f&16?-1:1;rp.hp=num(p.h);rp.age=num(p.e);
     rp.w=WEP[p.w]?p.w:'taco_madeira';rp.c=p.c==='m'?'m':'h';rp.sw=Math.max(rp.sw||0,num(p.sw));
     rp.gear={cabeca:Array.isArray(p.g)&&ITEM[p.g[0]]?p.g[0]:null,corpo:Array.isArray(p.g)&&ITEM[p.g[1]]?p.g[1]:null};
     const sh=num(p.sh);if(rp.shots!=null&&sh>rp.shots&&rp.sc===scId(SC)&&rp.x!=null){const ox=rp.x+Math.cos(rp.a)*30,oy=rp.y-32+Math.sin(rp.a)*30;
@@ -2780,6 +2780,7 @@ function readPeer(peer,rp){const pr=peer.presence||{};
     NET.seen[peer.peer]=top}}
 function netTick(dt){
   const now=performance.now();
+  {const k=scId(SC);NET.age=(NET.scK===k&&state!=='end')?(NET.age||0)+dt:0;NET.scK=k}
   for(const r of RP.values()){if(r.tx==null)continue;r.sw=Math.max(0,(r.sw||0)-dt);
     if(r.x==null||dist(r.x,r.y,r.tx,r.ty)>260){r.x=r.tx;r.y=r.ty}else{const k=Math.min(1,dt*12);r.x+=(r.tx-r.x)*k;r.y+=(r.ty-r.y)*k}
     r.jz=(r.jz||0)+((r.tz||0)-(r.jz||0))*Math.min(1,dt*18);
@@ -2799,13 +2800,14 @@ function netTick(dt){
   if(!NET.host&&hostP){const hp=hostP.presence;if(typeof hp.M==='string')applyM(hp.M);if(typeof hp.D==='number'&&isFinite(hp.D)&&hp.D>=0){if(Math.abs(hp.D-GT)>3)GT=hp.D;else GT+=(hp.D-GT)*.2}
     if(typeof hp.G==='string'&&hp.G!==NET.lastG&&applyG(hp.G)!==false)NET.lastG=hp.G}
   // dono da cena: o menor id entre quem está na mesma cena
-  const sh=sharers();let owner=NET.me,ownerR=null;for(const r of sh)if(r.peer<owner){owner=r.peer;ownerR=r}
+  const sh=sharers();let owner=NET.me,ownerR=null,oAge=Math.floor(NET.age||0);
+  for(const r of sh){const a=r.age||0;if(a>oAge+3||(Math.abs(a-oAge)<=3&&r.peer<owner)){owner=r.peer;ownerR=r;oAge=a}}
   if(ownerR&&ownerR.last&&ownerR.last.z!==ownerR.lastZ){ownerR.lastZ=ownerR.last.z;applySnap(ownerR.lastZ)}
   // minha presença
   const dead=state==='end';
   const p={s:scId(SC),x:Math.round(P.x),y:Math.round(P.y),a:Math.round(P.ang*100)/100,
     f:(P.moving?1:0)|(P.run?2:0)|(P.crouch||P.search?4:0)|(dead?8:0)|(P.face<0?16:0),h:Math.max(0,Math.round(P.hp)),w:curW(),c:P.char,
-    sw:Math.round(P.swing*100)/100,sh:NET.shots,z:Math.round(P.jz||0),g:[P.gear.cabeca||0,P.gear.corpo||0]};
+    sw:Math.round(P.swing*100)/100,sh:NET.shots,z:Math.round(P.jz||0),g:[P.gear.cabeca||0,P.gear.corpo||0],e:Math.min(999999,Math.floor(NET.age||0))};
   const patch={p};const S=NET.sent;
   const k=NET.kr.join(',');if(k!==S.k)patch.k=S.k=k;
   const dr=giStr();if(dr!==S.dr)patch.dr=S.dr=dr;const pk=GI.pk.join(';');if(pk!==S.pk)patch.pk=S.pk=pk;
