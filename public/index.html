@@ -2577,7 +2577,7 @@ let pauseStart=0;
 function togglePause(){if(state==='play'){if(invOpen)toggleInv();state='pause';pauseStart=performance.now();for(const k in keys)keys[k]=false;mouse.down=false;atkTouch=false;joy=null;
     $('pauseSub').textContent=NET.on?'No multiplayer o jogo continua rodando':'O jogo está parado';$('pauseHint').textContent=isTouch?'':'Esc também volta para o jogo';$('pause').hidden=false;$('pResume').focus()}
   else if(state==='pause'){state='play';if(!NET.on)stats.paused+=performance.now()-pauseStart;$('pause').hidden=true;lastT=0}}
-function toggleInv(){if(state!=='play')return;invOpen=!invOpen;$('invPanel').hidden=!invOpen;invHover=false;if(invOpen)renderInv()}
+function toggleInv(){if(state!=='play')return;invOpen=!invOpen;if(invOpen)craftOn=false;$('invPanel').hidden=!invOpen;invHover=false;if(invOpen)renderInv()}
 const IW={pano:.1,polvora:.05,couro_lobo:.8,couro_javali:1,couro_urso:1.5,colete_lobo:1.5,colete_javali:2,colete_urso:2.5,metralhadora:7,amg:.03,agua:.5,energetico:.4,feijoada:.6,macarrao:.5,barra:.1,curativo:.1,bandagem:.1,kit:1,a9mm:.02,a45:.03,acart:.05,a556:.02,a308:.04,madeira:.5,pregos:.01,martelo:1,chave:.3,chapa:1.5,sucata:.3,capacete:1,colete:3,taco_madeira:1.5,taco_ferro:2.5,facao:1,machado:2.5,machado_bombeiro:3.5,pistola:.9,revolver:1.1,rifle:3.5,shotgun:3.2};
 const invFold={};
 // ================= craft =================
