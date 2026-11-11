@@ -246,6 +246,11 @@ canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:c
 .is-touch .tl{grid-template-columns:auto 80px}
 .is-touch #mini{width:120px;height:90px}
 .is-touch .bl{bottom:auto;top:114px}
+.is-touch #mpHud{position:fixed;left:max(10px,env(safe-area-inset-left,0px));top:84px;min-width:0;max-width:168px;padding:4px 7px;background:rgba(14,13,20,.6)}
+.is-touch .mphead{gap:5px;margin-bottom:2px}.is-touch .mphead .lbl{display:none}.is-touch .mphead b{font-size:10px;letter-spacing:.06em}
+.is-touch .mpx{padding:2px 5px;font-size:8px}
+.is-touch .chat{width:min(250px,calc(100vw - 20px))}.is-touch .cmsg{font-size:10px;padding:1px 6px;line-height:1.3}.is-touch #chatLog{max-height:96px}.is-touch .chat.open #chatLog{max-height:150px}.is-touch #chatIn{font-size:13px;padding:4px 7px}
+.is-touch .mprow2{font-size:10px;line-height:1.35;gap:4px}.is-touch .mprow2 i{width:6px;height:6px}.is-touch .mprow2 em{font-size:9px}
 .is-touch .prompt{bottom:auto;top:58%}
 @media (max-width:560px){.tl{grid-template-columns:auto 80px}#mini{width:120px;height:90px}.obj #where{display:block;color:var(--edge);margin-top:2px}
 .obj b{font-size:16px}}
@@ -2982,7 +2987,11 @@ function netTick(dt){
   if(NET.host){patch.D=Math.round(GT*10)/10;const M=mutStr();if(M!==S.M)patch.M=S.M=M;NET.gt-=.1;if(NET.gt<=0){NET.gt=.5;const G=genStr();if(G!==S.G)patch.G=S.G=G}}else if(S.G){patch.G=null;S.G=''}
   NET.r.presence(patch).catch(()=>{});
   mpHudRender(peers)}
-function mpHudRender(){const list=[{name:NET.name+' (você)',col:'#ece9f5',hp:P.hp,dead:state==='end'},...[...RP.values()].map(r=>({name:r.name,col:r.col,hp:r.hp,dead:r.dead,far:r.sc!==scId(SC)}))];
+function placeMp(){const mp=$('mpHud'),bl=document.querySelector('#hud .bl'),tl=document.querySelector('#hud .tl');if(!mp||!bl||!tl)return;
+  if(!isTouch||mp.hidden){if(bl.style.top)bl.style.top='';if(mp.style.top)mp.style.top='';return}
+  const t=Math.round(tl.getBoundingClientRect().bottom+6)+'px';if(mp.style.top!==t)mp.style.top=t;
+  const b=Math.round(mp.getBoundingClientRect().bottom+6)+'px';if(bl.style.top!==b)bl.style.top=b}
+function mpHudRender(){placeMp();const list=[{name:NET.name+' (você)',col:'#ece9f5',hp:P.hp,dead:state==='end'},...[...RP.values()].map(r=>({name:r.name,col:r.col,hp:r.hp,dead:r.dead,far:r.sc!==scId(SC)}))];
   const key=list.map(o=>o.name+(o.dead?'x':Math.ceil((o.hp||0)/10))+(o.far?'f':'')).join('|');if(key===NET.listKey)return;NET.listKey=key;
   const box=$('mpList');box.textContent='';
   for(const o of list){const row=document.createElement('div');row.className='mprow2';const dot=document.createElement('i');dot.style.background=o.col;
@@ -3035,9 +3044,9 @@ async function mpEnter(kind){const creating=kind===true||kind==='create',pub=kin
   NET.r=r;NET.code=pub?label.toLowerCase():code;NET.on=true;
   try{await r.presence({g,n:NET.name})}catch(e){}
   r.onConnection(c=>{if(NET.r===r)$('mpCode').classList.toggle('off',!c)},()=>{});
-  mpSetBusy(false);mpMsg('');$('mpCode').textContent=label;$('mpHud').hidden=false;$('chat').hidden=false;$('chatLog').innerHTML='';chatAdd('',null,'Aperte Enter para conversar com os outros jogadores.',true);
+  mpSetBusy(false);mpMsg('');$('mpCode').textContent=label;$('mpHud').hidden=false;$('chat').hidden=false;$('chatLog').innerHTML='';chatAdd('',null,isTouch?'Toque em CHAT para conversar.':'Aperte Enter para conversar com os outros jogadores.',true);
   start()}
-function mpLeave(){const r=NET.r;NET.r=null;NET.on=false;RP.clear();$('mpHud').hidden=true;$('chat').hidden=true;chatClose();if(r)r.leave().catch(()=>{})}
+function mpLeave(){const r=NET.r;NET.r=null;NET.on=false;RP.clear();$('mpHud').hidden=true;placeMp();$('chat').hidden=true;chatClose();if(r)r.leave().catch(()=>{})}
 function syncMenuSel(){document.querySelectorAll('.dbtn').forEach(o=>o.setAttribute('aria-pressed',o.dataset.d===diffSel?'true':'false'));
   document.querySelectorAll('.mbtn').forEach(o=>o.setAttribute('aria-pressed',o.dataset.m===modeSel?'true':'false'))}
 // pontos de nascimento: o esgoto (com a cena do furgão) ou um dos quatro cantos do mapa, sorteado para cada jogador
