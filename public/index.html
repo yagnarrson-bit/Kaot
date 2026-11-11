@@ -250,7 +250,13 @@ canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:c
 .mpmsg{margin:0;font-size:12px;color:var(--muted);line-height:1.4}.mpmsg:empty{display:none}
 .mphud{padding:7px 10px;min-width:170px;pointer-events:auto}
 .mphead{display:flex;align-items:center;gap:8px;margin-bottom:4px}.mphead b{font-family:var(--display);font-size:14px;letter-spacing:.1em}.mphead b.off{color:var(--blood)}
-.mpx{margin-left:auto;padding:3px 7px;font-size:9px}
+.mpx{margin-left:auto;padding:3px 7px;font-size:9px}.mpx+.mpx{margin-left:4px}
+.chat{width:min(380px,calc(100vw - 20px));display:flex;flex-direction:column;gap:4px;pointer-events:auto}
+#chatLog{display:flex;flex-direction:column;gap:2px;max-height:180px;overflow:hidden;justify-content:flex-end}
+.cmsg{font-size:13px;line-height:1.35;padding:2px 8px;background:rgba(10,9,14,.62);border-radius:3px;color:#ece9f5;text-shadow:0 1px 0 #000;word-wrap:break-word;transition:opacity .8s}
+.cmsg b{font-weight:600;margin-right:5px}.cmsg.sys{color:#b9b6c9;font-style:italic}
+.cmsg.old{opacity:0}.chat.open .cmsg.old{opacity:.85}.chat.open #chatLog{max-height:260px}
+#chatIn{font:inherit;font-size:14px;color:var(--text);background:rgba(10,9,14,.85);border:2px solid var(--edge);border-radius:4px;padding:6px 9px;user-select:text;-webkit-user-select:text;outline:none}
 .mprow2{display:flex;align-items:center;gap:6px;font-size:12px;line-height:1.5}.mprow2 i{width:8px;height:8px;border-radius:50%;flex:none}
 .mprow2 span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mprow2 em{font-style:normal;color:var(--muted);font-variant-numeric:tabular-nums}
 #leaveBtn{align-self:center}
@@ -270,11 +276,12 @@ canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:c
     <div class="tr">
       <button class="pnl menubtn touch" id="menuBtn">MENU</button>
       <div class="obj pnl"><span class="lbl" id="leftLbl">Infectados restantes</span><b id="left">0</b><span class="lbl" id="clock">00:00</span><span class="lbl" id="dayLbl">Dia 1</span><span class="lbl" id="dayNext"></span><div id="dayBar"><i id="dayMk"></i></div><span class="lbl" id="where" hidden></span></div>
-      <div class="mphud pnl" id="mpHud" hidden><div class="mphead"><span class="lbl">Sala</span><b id="mpCode"></b><button class="xbtn mpx" id="mpExit">SAIR</button></div><div id="mpList"></div></div>
+      <div class="mphud pnl" id="mpHud" hidden><div class="mphead"><span class="lbl">Sala</span><b id="mpCode"></b><button class="xbtn mpx" id="chatBtn">CHAT</button><button class="xbtn mpx" id="mpExit">SAIR</button></div><div id="mpList"></div></div>
       <canvas id="mini" class="pnl" width="340" height="256"></canvas>
       <button class="pnl musbtn" id="musBtn" title="Som (N)">♪</button>
     </div>
     <div class="bl">
+      <div class="chat" id="chat" hidden><div id="chatLog" aria-live="polite"></div><input id="chatIn" maxlength="80" placeholder="Mensagem · Enter envia · Esc cancela" autocomplete="off" spellcheck="false" hidden></div>
       <div class="pets" id="pets"></div>
       <div class="inv pnl" id="inv"></div>
       <div class="slots" id="slots"></div>
@@ -1119,6 +1126,8 @@ function resize(){DPR=Math.min(window.devicePixelRatio||1,2);Wd=cv.clientWidth;H
 addEventListener('resize',resize);resize();
 const keys={};const mouse={sx:0,sy:0,down:false};let isTouch=false;
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();
+  if(document.activeElement===$('chatIn'))return;
+  if((k==='enter'||k==='t')&&state==='play'&&NET.on&&!CUT.on&&!invOpen){e.preventDefault();chatOpen();return}
   if(k==='tab'||k==='i'){if(state==='play'){e.preventDefault();toggleInv()}return}
   if(invOpen&&document.activeElement&&document.activeElement!==document.body&&$('invPanel').contains(document.activeElement))document.activeElement.blur();
   if(k==='m'){if(state==='play'||state==='map'){toggleMap()}return}
@@ -2751,7 +2760,20 @@ const RP=new Map();
 const PCOL=['#4aa3e0','#e5a43a','#9be33a','#e36a9a','#5fd3c4','#c9a3ff','#f0d04a'];
 function pcol(peer){let h=0;for(const ch of String(peer))h=h*31+ch.charCodeAt(0)|0;return PCOL[Math.abs(h)%PCOL.length]}
 const cleanName=s=>String(s||'').replace(/[\u0000-\u001f\u007f-\u009f­​-‏‪-‮⁠-⁯﻿]/g,'').trim().slice(0,14);
-function netReset(){NET.kr=[];NET.hr=[];NET.sent={};NET.lastG='';NET.seen={};NET.t=0;NET.gt=0;NET.won=false;RP.clear()}
+// ---------- chat (vai na presença: as 3 últimas mensagens de cada jogador, com número de sequência) ----------
+const chatClean=s=>String(s||'').replace(/[\u0000-\u001f\u007f-\u009f\u00ad\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]/g,'').replace(/\s+/g,' ').trim().slice(0,80);
+function chatAdd(name,col,text,sys){const log=$('chatLog');const d=document.createElement('div');d.className='cmsg'+(sys?' sys':'');
+  if(name){const b=document.createElement('b');b.style.color=col||'#ece9f5';b.textContent=name+':';d.appendChild(b)}d.appendChild(document.createTextNode(text));log.appendChild(d);
+  while(log.children.length>8)log.firstChild.remove();setTimeout(()=>d.classList.add('old'),12000)}
+function chatOpen(){if(!NET.on)return;for(const k in keys)keys[k]=false;mouse.down=false;const i=$('chatIn');i.hidden=false;$('chat').classList.add('open');i.value='';i.focus()}
+function chatClose(){const i=$('chatIn');i.hidden=true;i.blur();$('chat').classList.remove('open')}
+function chatSend(){const t=chatClean($('chatIn').value);chatClose();if(!t||!NET.on)return;const now=performance.now();
+  if(now-(NET.chatT||0)<900){chatAdd('',null,'Calma, espere um segundo entre as mensagens.',true);return}NET.chatT=now;
+  NET.cs=(NET.cs||0)+1;NET.chat=(NET.chat||[]).concat([[NET.cs,t]]).slice(-3);chatAdd(NET.name+' (você)','#ece9f5',t)}
+function chatRead(pr,rp){if(!Array.isArray(pr.c))return;let top=rp.cs==null?-1:rp.cs;const first=rp.cs==null;
+  for(const m of pr.c.slice(-3)){if(!Array.isArray(m))continue;const n=m[0],t=chatClean(m[1]);if(!(Number.isInteger(n)&&n>0)||!t)continue;if(!first&&n>top)chatAdd(rp.name,rp.col,t);if(n>top)top=n}
+  rp.cs=Math.max(top,0)}
+function netReset(){NET.kr=[];NET.chat=[];NET.cs=0;NET.hr=[];NET.sent={};NET.lastG='';NET.seen={};NET.t=0;NET.gt=0;NET.won=false;RP.clear()}
 function sharers(){const s=scId(SC),out=[];for(const r of RP.values())if(r.sc===s&&!r.dead&&r.x!=null)out.push(r);return out}
 function zSnap(sh){const pl=[P,...sh],arr=[];
   for(const z of SC.Z){let m=1e9;for(const p of pl){const d=Math.abs(z.x-p.x)+Math.abs(z.y-p.y);if(d<m)m=d}if(m<1150)arr.push([m,z])}
@@ -2771,6 +2793,7 @@ function readPeer(peer,rp){const pr=peer.presence||{};
     rp.gear={cabeca:Array.isArray(p.g)&&ITEM[p.g[0]]?p.g[0]:null,corpo:Array.isArray(p.g)&&ITEM[p.g[1]]?p.g[1]:null};
     const sh=num(p.sh);if(rp.shots!=null&&sh>rp.shots&&rp.sc===scId(SC)&&rp.x!=null){const ox=rp.x+Math.cos(rp.a)*30,oy=rp.y-32+Math.sin(rp.a)*30;
       FX.push({k:'flash',x:ox,y:oy,life:.05,max:.05});FX.push({k:'tr',x:ox,y:oy,x2:ox+Math.cos(rp.a)*420,y2:oy+Math.sin(rp.a)*420,life:.07,max:.07})}rp.shots=sh}
+  chatRead(pr,rp);
   rp.dr=giParse(pr.dr);
   if(typeof pr.pk==='string')for(const id of pr.pk.split(';').slice(0,40)){if(!id)continue;GI.picked.add(id);if(GI.mine.some(o=>o.id===id))GI.mine=GI.mine.filter(o=>o.id!==id)}
   if(typeof pr.k==='string')for(const it of pr.k.split(',').slice(0,40)){const [a,b]=it.split('.');const id=parseInt(a,36),g=parseInt(b,36);if(id>=0&&g>=0)remoteKill(id,g)}
@@ -2793,9 +2816,9 @@ function netTick(dt){
   for(const peer of peers){const pr=peer.presence||{};
     if(!peer.sameTab&&pr.g&&typeof pr.g==='object'){const rk=[Number.isFinite(pr.g.r)?pr.g.r:1e9,peer.peer];if(rk[0]<hr[0]||(rk[0]===hr[0]&&rk[1]<hr[1])){hr=rk;host=peer.peer;hostP=peer}}
     if(peer.sameTab||peer.kind!=='viewer')continue;alive.add(peer.peer);
-    let rp=RP.get(peer.peer);if(!rp){rp={peer:peer.peer,name:'Agente',col:pcol(peer.peer),last:null};RP.set(peer.peer,rp);if(pr.n)toast((cleanName(pr.n)||'Um agente')+' entrou na sala.',null)}
+    let rp=RP.get(peer.peer);if(!rp){rp={peer:peer.peer,name:'Agente',col:pcol(peer.peer),last:null};RP.set(peer.peer,rp);if(pr.n){toast((cleanName(pr.n)||'Um agente')+' entrou na sala.',null);chatAdd('',null,(cleanName(pr.n)||'Um agente')+' entrou.',true)}}
     if(peer.presence!==rp.last){rp.last=peer.presence;readPeer(peer,rp)}}
-  for(const [k,r] of RP)if(!alive.has(k)){RP.delete(k);toast(r.name+' saiu da sala.',null)}
+  for(const [k,r] of RP)if(!alive.has(k)){RP.delete(k);toast(r.name+' saiu da sala.',null);chatAdd('',null,r.name+' saiu.',true)}
   NET.host=host===NET.me;
   if(!NET.host&&hostP){const hp=hostP.presence;if(typeof hp.M==='string')applyM(hp.M);if(typeof hp.D==='number'&&isFinite(hp.D)&&hp.D>=0){if(Math.abs(hp.D-GT)>3)GT=hp.D;else GT+=(hp.D-GT)*.2}
     if(typeof hp.G==='string'&&hp.G!==NET.lastG&&applyG(hp.G)!==false)NET.lastG=hp.G}
@@ -2812,6 +2835,7 @@ function netTick(dt){
   const k=NET.kr.join(',');if(k!==S.k)patch.k=S.k=k;
   const dr=giStr();if(dr!==S.dr)patch.dr=S.dr=dr;const pk=GI.pk.join(';');if(pk!==S.pk)patch.pk=S.pk=pk;
   const h=NET.hr.join(',');if(h!==S.h)patch.h=S.h=h;
+  {const c=JSON.stringify(NET.chat||[]);if(c!==S.c){S.c=c;patch.c=NET.chat||[]}}
   const z=owner===NET.me&&sh.length&&!dead?zSnap(sh):'';if(z!==S.z)patch.z=S.z=z;
   if(NET.host){patch.D=Math.round(GT*10)/10;const M=mutStr();if(M!==S.M)patch.M=S.M=M;NET.gt-=.1;if(NET.gt<=0){NET.gt=.5;const G=genStr();if(G!==S.G)patch.G=S.G=G}}else if(S.G){patch.G=null;S.G=''}
   NET.r.presence(patch).catch(()=>{});
@@ -2869,9 +2893,9 @@ async function mpEnter(kind){const creating=kind===true||kind==='create',pub=kin
   NET.r=r;NET.code=pub?label.toLowerCase():code;NET.on=true;
   try{await r.presence({g,n:NET.name})}catch(e){}
   r.onConnection(c=>{if(NET.r===r)$('mpCode').classList.toggle('off',!c)},()=>{});
-  mpSetBusy(false);mpMsg('');$('mpCode').textContent=label;$('mpHud').hidden=false;
+  mpSetBusy(false);mpMsg('');$('mpCode').textContent=label;$('mpHud').hidden=false;$('chat').hidden=false;$('chatLog').innerHTML='';chatAdd('',null,'Aperte Enter para conversar com os outros jogadores.',true);
   start()}
-function mpLeave(){const r=NET.r;NET.r=null;NET.on=false;RP.clear();$('mpHud').hidden=true;if(r)r.leave().catch(()=>{})}
+function mpLeave(){const r=NET.r;NET.r=null;NET.on=false;RP.clear();$('mpHud').hidden=true;$('chat').hidden=true;chatClose();if(r)r.leave().catch(()=>{})}
 function syncMenuSel(){document.querySelectorAll('.dbtn').forEach(o=>o.setAttribute('aria-pressed',o.dataset.d===diffSel?'true':'false'));
   document.querySelectorAll('.mbtn').forEach(o=>o.setAttribute('aria-pressed',o.dataset.m===modeSel?'true':'false'))}
 // pontos de nascimento: o esgoto (com a cena do furgão) ou um dos quatro cantos do mapa, sorteado para cada jogador
@@ -2964,7 +2988,10 @@ $('mpPublic').addEventListener('click',()=>mpEnter('public'));$('mpCreate').addE
 $('code').addEventListener('keydown',e=>{if(e.key==='Enter')mpEnter(false)});
 const toMenu=()=>{if(NET.on)mpLeave();if(P&&P.drv)P.drv=null;$('pause').hidden=true;$('end').hidden=true;$('hud').hidden=true;$('invPanel').hidden=true;invOpen=false;$('mapPanel').hidden=true;$('menu').hidden=false;P=null;state='menu'};
 $('leaveBtn').addEventListener('click',toMenu);$('pMenu').addEventListener('click',toMenu);$('pResume').addEventListener('click',togglePause);
-$('menuBtn').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();setTouch();if(state==='play')togglePause()},{passive:false});$('menuBtn').addEventListener('click',()=>{if(state==='play')togglePause()});$('mpExit').addEventListener('click',toMenu);if(document.readyState==='complete')setPreviews();else addEventListener('load',setPreviews);setTimeout(setPreviews,400);
+$('menuBtn').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();setTouch();if(state==='play')togglePause()},{passive:false});$('menuBtn').addEventListener('click',()=>{if(state==='play')togglePause()});$('mpExit').addEventListener('click',toMenu);
+$('chatBtn').addEventListener('click',e=>{e.stopPropagation();if(state==='play')chatOpen()});
+$('chatIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter'){e.preventDefault();chatSend()}else if(e.key==='Escape'){e.preventDefault();chatClose()}});
+$('chatIn').addEventListener('blur',()=>setTimeout(()=>{if(document.activeElement!==$('chatIn'))chatClose()},0));if(document.readyState==='complete')setPreviews();else addEventListener('load',setPreviews);setTimeout(setPreviews,400);
 $('again').addEventListener('click',()=>{if(NET.on&&!NET.won){respawn();return}toMenu()});
 $('invClose').addEventListener('click',toggleInv);$('craftBtn').addEventListener('click',e=>{e.stopPropagation();craftOn=!craftOn;if(invOpen)renderInv()});$('dropMode').addEventListener('click',e=>{e.stopPropagation();GI.mode=!GI.mode;$('dropMode').classList.toggle('on',GI.mode);if(invOpen)renderInv()});{const ic=$('invPanel').querySelector('.card');ic.addEventListener('mouseenter',()=>invHover=true);ic.addEventListener('mouseleave',()=>invHover=false)}$('mapClose').addEventListener('click',toggleMap);$('buffImg').src=SPR.energetico;
 let lastT=0;
