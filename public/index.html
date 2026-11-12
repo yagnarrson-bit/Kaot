@@ -138,8 +138,8 @@ canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:c
 /* ===== menus no estilo da intro: preto, botões escuros, detalhes dourados ===== */
 #menu,#pause,#end{background:radial-gradient(ellipse at 50% 30%,rgba(28,22,10,.97) 0%,rgba(6,6,7,.99) 55%,#000 100%)}
 #menu .card,#pause .card,#end .card{background:rgba(9,9,11,.94);border:1px solid #3a3020;border-radius:6px;box-shadow:0 0 0 1px #000,0 0 60px rgba(217,168,74,.07)}
-#menu .logo,#pause .logo{color:#f3e6bf;text-shadow:0 0 22px rgba(217,168,74,.35),3px 3px 0 #2a2110}
-#menu .logo small,#pause .logo small{color:#c9a24a}
+#menu .logo,#pause .logo,#skinPanel .logo{color:#f3e6bf;text-shadow:0 0 22px rgba(217,168,74,.35),3px 3px 0 #2a2110}
+#menu .logo small,#pause .logo small,#skinPanel .logo small{color:#c9a24a}
 #menu .lbl,#pause .lbl,#end .lbl{color:#8d826a}
 #menu .story,#end .story{color:#9a9488}#menu .story strong{color:#eadfc2}
 #end h2{color:#f3e6bf;text-shadow:0 0 18px rgba(217,168,74,.25)}
@@ -151,8 +151,8 @@ canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:c
 #menu .mpbox input{background:#050506;border:1px solid #2a261e;color:#eadfc2}#menu .mpbox input:focus{border-color:#c9a24a}
 #menu .xbtn,#pause .xbtn,#end .xbtn{background:#121115;border:1px solid #4a3f28;color:#e8dcc0}
 #menu .xbtn:hover,#pause .xbtn:hover,#end .xbtn:hover{border-color:#c9a24a}
-#menu .go,#pause .go,#end .go{background:#121115;color:#e9c46a;border:1px solid #c9a24a;box-shadow:0 3px 0 #3a2f15,0 0 24px rgba(217,168,74,.12);text-shadow:0 0 10px rgba(233,196,106,.35)}
-#menu .go:hover,#pause .go:hover,#end .go:hover{background:#1c1810}
+#menu .go,#pause .go,#end .go,#skinPanel .go{background:#121115;color:#e9c46a;border:1px solid #c9a24a;box-shadow:0 3px 0 #3a2f15,0 0 24px rgba(217,168,74,.12);text-shadow:0 0 10px rgba(233,196,106,.35)}
+#menu .go:hover,#pause .go:hover,#end .go:hover,#skinPanel .go:hover{background:#1c1810}
 #menu .go:active,#pause .go:active,#end .go:active{box-shadow:0 1px 0 #3a2f15}
 #menu .keys{color:#8d826a}#menu .keys kbd{background:#000;border-color:#2a261e;color:#eadfc2}
 #end .stats span:nth-child(even){color:#eadfc2}
@@ -218,6 +218,24 @@ canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:c
 .keys kbd{font-family:var(--display);font-size:10px;color:var(--text);background:#0c0b10;border:1px solid #3a3650;padding:1px 5px;border-radius:3px;margin-right:4px}
 .go.cont{display:flex;flex-direction:column;align-items:center;gap:4px}.go.cont span{font-family:var(--body);font-weight:400;font-size:11px;letter-spacing:0;opacity:.8}
 #menu .go.warn{border-color:#e05a4a;color:#ffb0a6}
+#menu .skinbtn{width:100%;padding:9px;font-size:12px;letter-spacing:.06em}
+#skinPanel .card{background:rgba(9,9,11,.96);border:1px solid #3a3020;border-radius:6px;box-shadow:0 0 0 1px #000,0 0 60px rgba(217,168,74,.07);max-width:640px}
+#skinPanel .xbtn{background:#121115;border:1px solid #4a3f28;color:#e8dcc0}
+#skinPanel .lbl{color:#8d826a}
+.sklogo{font-size:30px}
+.skbody{display:grid;grid-template-columns:170px 1fr;gap:14px;align-items:start}
+.skprev{display:flex;flex-direction:column;align-items:center;gap:8px;background:#111014;border:1px solid #2a261e;border-radius:6px;padding:8px;position:sticky;top:0}
+#skinCv{width:150px;height:188px;image-rendering:pixelated}
+.skch{display:flex;gap:6px}#skinPanel .skch .xbtn[aria-pressed="true"]{border-color:#c9a24a;background:#1a160d;color:#f0d896}
+.skrows{display:flex;flex-direction:column;gap:10px}
+.skrow{display:flex;flex-direction:column;gap:5px}
+.sws{display:flex;flex-wrap:wrap;gap:6px}
+.sw{width:30px;height:30px;border-radius:4px;border:2px solid #16121a;box-shadow:0 0 0 1px #3a3020;cursor:pointer;padding:0;position:relative}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2px #e0b858}
+.sw.def::after{content:'P';position:absolute;right:1px;bottom:0;font:700 9px/1 var(--display);color:#fff;text-shadow:0 0 2px #000,0 0 2px #000}
+.sw.txt{width:auto;padding:0 9px;font:11px var(--display);background:#121115;color:#e8dcc0}
+.skfoot{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch}.skfoot .go{flex:1;min-width:140px}
+@media (max-width:560px){.skbody{grid-template-columns:1fr}.skprev{position:static;flex-direction:row;justify-content:center}#skinCv{width:110px;height:138px}.skch{flex-direction:column}}
 .go{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.08em;color:var(--night);background:var(--edge);border:0;border-radius:6px;padding:12px;cursor:pointer;box-shadow:0 4px 0 #4c4290}
 .go:active{transform:translateY(2px);box-shadow:0 2px 0 #4c4290}
 .end h2{font-family:var(--display);font-size:32px;margin:0}
@@ -362,6 +380,7 @@ canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:c
         <button class="charbtn" data-ch="h" aria-pressed="true"><img id="pH" alt=""><span><b>Agente</b><br><span class="lbl">Homem</span></span></button>
         <button class="charbtn" data-ch="m" aria-pressed="false"><img id="pM" alt=""><span><b>Agente</b><br><span class="lbl">Mulher</span></span></button>
       </div>
+      <button class="xbtn skinbtn" id="skinBtn">PERSONALIZAR SKIN ▸</button>
       <div class="lbl">Dificuldade</div>
       <div class="diffs">
         <button class="dbtn" data-d="facil" aria-pressed="true"><b>Fácil</b><span>380 zumbis</span><span>velocidade normal</span></button>
@@ -389,6 +408,18 @@ canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:c
       </div>
       <button class="go cont" id="contBtn" hidden>CONTINUAR<span id="contInfo"></span></button>
       <button class="go" id="go">DESCER PELO ESGOTO</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="skinPanel" hidden>
+    <div class="card skcard">
+      <div class="logo sklogo">SKIN<small>PERSONALIZE O SEU AGENTE</small></div>
+      <div class="skbody">
+        <div class="skprev"><canvas id="skinCv" width="160" height="200"></canvas>
+          <div class="skch"><button class="xbtn" data-sc="h">Homem</button><button class="xbtn" data-sc="m">Mulher</button></div></div>
+        <div class="skrows" id="skinRows"></div>
+      </div>
+      <div class="skfoot"><button class="xbtn" id="skinRand">ALEATÓRIO</button><button class="xbtn" id="skinReset">PADRÃO</button><button class="go" id="skinOk">PRONTO</button></div>
     </div>
   </div>
 
@@ -1185,7 +1216,7 @@ function freeSpot(S,o){o=o||{};const bd=S.bounds;for(let i=0;i<300;i++){let x,y;
 function newGameCore(){
   const zin=genWorld();SC=OUT;
   P={x:bueiros[0].x+30,y:bueiros[0].y+6,r:10,face:1,hp:100,fo:100,se:100,crouch:false,run:false,ang:0,cd:0,inv:0,dash:0,dashCd:0,st:100,stT:0,tired:false,jh:0,drv:null,vx:0,vy:0,
-    anim:0,moving:false,swing:0,hitDone:true,recoil:0,reload:0,search:null,buff:0,eat:0,eatItem:null,char:charSel,t:0,
+    anim:0,moving:false,swing:0,hitDone:true,recoil:0,reload:0,search:null,buff:0,eat:0,eatItem:null,char:charSel,sk:skinSel,t:0,
     weapons:['taco_madeira','pistola'],cur:1,mag:{pistola:12},ammo:{a9mm:12},items:{agua:1,barra:1,energetico:1,bandagem:1},mats:{},gear:{cabeca:null,corpo:null},gearBag:{}};
   A=[];B=[];FX=[];pets={cao:null,gato:null};
   const DF=DIFF[diffSel];let intN=0;for(const b of buildings)intN+=b.zin;
@@ -1632,7 +1663,7 @@ function cutArriveStep(){const t=CUT.t,F=CUT.flags,g=$('cutCv').getContext('2d')
     else if(t<9.4){const k=(t-6.6)/2.8;ax=L+2;ay=FL-k*(FL+40);moving=true;climb=true}
     else{ax=L+2;ay=-60}
     g.save();g.translate(Math.round(ax),Math.round(ay));g.scale(.62,.62);
-    drawRig(g,0,0,{char:P.char,face,phase:(t*(climb?1.6:2.2))%1,moving,run:false,crouch:false,ang:climb?-1.25:.2,weapon:curW(),swing:0,recoil:0,eat:0,eatItem:null,search:false,t,reload:0,hurt:0,gear:P.gear},false);g.restore()}
+    drawRig(g,0,0,{char:P.char,sk:P.sk,face,phase:(t*(climb?1.6:2.2))%1,moving,run:false,crouch:false,ang:climb?-1.25:.2,weapon:curW(),swing:0,recoil:0,eat:0,eatItem:null,search:false,t,reload:0,hurt:0,gear:P.gear},false);g.restore()}
   // brilho final ao chegar no alto
   if(t>8.9){const a=Math.min(1,(t-8.9)/.6);g.fillStyle=`rgba(255,245,215,${a*.9})`;g.fillRect(0,0,W,H)}
   // vinheta
@@ -2448,15 +2479,32 @@ const CH_PAL={
   m:{skin:'#e0aa78',skinD:'#bf8c5e',hair:'#6b3f22',shirt:'#77714f',shirtD:'#5f5a3e',sleeve:'#4a2e24',sleeveD:'#3a231b',pants:'#3b4a5e',pantsD:'#2d394a',boots:'#3a2a1e',belt:'#2b1f17'},
 };
 const OLC='#16121a';
+// skin: 7 letras (pele, cabelo, jaqueta/capuz, camisa, calça, botas, extra). 0 = cor original do agente.
+const SKIN_OPT=[
+  {k:'pele',n:'Pele',c:[null,'#f3cfac','#e0aa78','#c98a5e','#a8704a','#82553a','#5e3b28']},
+  {k:'cabelo',n:'Cabelo',c:[null,'#1e1a18','#5a3520','#8a5a2c','#d8b45a','#b8442c','#d8d4cc','#3a6aaa','#c04a8a']},
+  {k:'jaqueta',n:'Jaqueta / capuz',c:[null,'#6a4630','#2c2c34','#4f6234','#7a2a2a','#2e4a6a','#8a8f98','#c9a24a','#5a3a6a','#d8d4c8']},
+  {k:'camisa',n:'Camisa',c:[null,'#3f566b','#77714f','#d8d4c8','#2a2a2e','#8a2e2e','#3f6a46','#c98a2e','#5a7aa8']},
+  {k:'calca',n:'Calça',c:[null,'#8a7350','#3b4a5e','#2a2a2e','#4d5a33','#6a6a72','#5a3a2a','#7a2a2a']},
+  {k:'botas',n:'Botas',c:[null,'#3a2a1e','#1e1c20','#6a4a2a','#4d5a33','#8a2e2e','#d8d4c8']},
+  {k:'extra',n:'Acessório',t:['Nada','Óculos escuros','Bandana','Barba','Óculos + bandana']}];
+let skinSel='0000000';try{const v=localStorage.getItem('kaot-skin');if(/^[0-9a-z]{7}$/.test(v||''))skinSel=v}catch(e){}
+const SKC={};
+function skinPal(ch,sk){const base=CH_PAL[ch]||CH_PAL.h;if(!sk||sk==='0000000')return base;const key=ch+sk;if(SKC[key])return SKC[key];
+  const c={...base},v=i=>{const o=SKIN_OPT[i],n=parseInt(sk[i]||'0',36)||0;return o.c?o.c[n]||null:n},D=k=>shade(k,-.24);let k;
+  if((k=v(0))){c.skin=k;c.skinD=shade(k,-.16)}if((k=v(1)))c.hair=k;
+  if((k=v(2))){c.sleeve=k;c.sleeveD=D(k);if(ch==='h'){c.hood=k;c.hoodD=D(k)}}
+  if((k=v(3))){c.shirt=k;c.shirtD=D(k)}if((k=v(4))){c.pants=k;c.pantsD=D(k)}if((k=v(5)))c.boots=k;
+  c.extra=v(6)%SKIN_OPT[6].t.length;return SKC[key]=c}
 function seg(g,x1,y1,x2,y2,w,c){g.lineCap='round';g.strokeStyle=OLC;g.lineWidth=w+2;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();g.strokeStyle=c;g.lineWidth=w;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke()}
 function ik(sx,sy,tx,ty,a,b,bend){let dx=tx-sx,dy=ty-sy,d=Math.hypot(dx,dy)||.01;d=clamp(d,Math.abs(a-b)+.01,a+b-.01);const ang=Math.atan2(dy,dx);const A=Math.acos(clamp((a*a+d*d-b*b)/(2*a*d),-1,1));const e=ang+bend*A;
   return{ex:sx+Math.cos(e)*a,ey:sy+Math.sin(e)*a,hx:sx+Math.cos(ang)*d,hy:sy+Math.sin(ang)*d}}
 function poseFromP(face,ghost,crouchOverride){
-  return{char:P.char,face,phase:P.anim%1,moving:P.moving&&!ghost&&!P.ride,run:P.run&&P.moving&&!ghost&&!P.ride,crouch:crouchOverride!=null?crouchOverride:(P.ride||P.crouch||!!P.search||(!ghost&&P.jz>10)),
+  return{char:P.char,sk:P.sk,face,phase:P.anim%1,moving:P.moving&&!ghost&&!P.ride,run:P.run&&P.moving&&!ghost&&!P.ride,crouch:crouchOverride!=null?crouchOverride:(P.ride||P.crouch||!!P.search||(!ghost&&P.jz>10)),
     ang:P.ang,weapon:curW(),swing:ghost?0:P.swing,recoil:ghost?0:P.recoil,eat:ghost?0:P.eat,eatItem:P.eatItem,search:!ghost&&!!P.search,t:P.t,reload:ghost?0:P.reload,hurt:ghost?0:(P.hurt||0),gear:P.gear}}
 function drawPlayerRig(x,y,face,o){const pose=poseFromP(face,!!o.ghost,o.crouch);ctx.save();if(o.ghost){ctx.globalAlpha=o.ghost}drawRig(ctx,x,y,pose,!!o.ghost);ctx.restore()}
 function drawRig(g,x,y,o,ghost){
-  const C=CH_PAL[o.char],W=WEP[o.weapon];const ph=o.phase*6.2832;
+  const C=skinPal(o.char,o.sk),W=WEP[o.weapon];const ph=o.phase*6.2832;
   g.save();g.translate(x,y);if(o.face<0)g.scale(-1,1);
   if(ghost){g.globalCompositeOperation='source-over';}
   let hipY=-28,bob=0,lean=0,legs;
@@ -2515,6 +2563,10 @@ function drawRig(g,x,y,o,ghost){
   else{g.fillStyle=C.hair;g.fillRect(-5.5,-6.5,12,4);g.fillRect(-5.5,-6.5,5,10);g.fillStyle=OLC;const sw=o.moving?Math.sin(ph*2)*1.5:Math.sin(o.t*2)*.5;g.fillRect(-10+sw*.3,-4,5,10+sw);g.fillStyle=C.hair;g.fillRect(-9+sw*.3,-3,3,8+sw);g.fillStyle='#3a231b';g.fillRect(-6,-3,2,2)}
   g.fillStyle=OLC;g.fillRect(3.5,-1.5,2,2);g.fillStyle='rgba(0,0,0,.35)';g.fillRect(3,-3.5,3,1);g.fillStyle=C.skinD;g.fillRect(4,3,2,1);g.fillRect(6,0,1,2);
   if(o.hurt>0){g.fillStyle=OLC;g.fillRect(3,-2,3,1)}
+  if(C.extra){const x=C.extra;
+    if(x===3){g.fillStyle=C.hair;g.fillRect(1,1.5,6,4);g.fillRect(.5,-1,1.5,3);g.fillStyle=shade('#3a231b',-.2);g.fillRect(4,3,2.5,1)}
+    if(x===2||x===4){g.fillStyle=OLC;g.fillRect(.5,.5,7,5.5);g.fillStyle='#a8322c';g.fillRect(1,1,6.5,4.5);g.fillStyle='#e8dcc0';g.fillRect(2,2,1,1);g.fillRect(5,3.5,1,1);g.fillStyle='#7a2420';g.fillRect(1,4.5,6.5,1)}
+    if(x===1||x===4){g.fillStyle=OLC;g.fillRect(.5,-3,7.5,3.5);g.fillStyle='#22202a';g.fillRect(1.5,-2.5,5.5,2.5);g.fillStyle='rgba(160,200,255,.55)';g.fillRect(2,-2.5,2,1)}}
   if(o.gear&&o.gear.cabeca==='capacete'){g.fillStyle=OLC;g.fillRect(-8,-11,16,6);g.fillRect(-9,-6,18,2.5);g.fillStyle='#e5b32c';g.fillRect(-7,-10,14,5);g.fillRect(-8,-5.5,16,1.5);g.fillStyle='#f6d36a';g.fillRect(-1,-10,2,5)}
   g.restore();
   // arma
@@ -2678,7 +2730,7 @@ function drawBird(g,a,x,y,o){
   g.restore()}
 
 function charPreview(c){const cv=document.createElement('canvas');cv.width=72;cv.height=96;const g=cv.getContext('2d');g.scale(1.4,1.4);
-  drawRig(g,24,66,{char:c,face:1,phase:0,moving:false,run:false,crouch:false,ang:.35,weapon:c==='h'?'taco_madeira':'pistola',swing:0,recoil:0,eat:0,search:false,t:0,reload:0,hurt:0,gear:{}});return cv.toDataURL()}
+  drawRig(g,24,66,{char:c,sk:skinSel,face:1,phase:0,moving:false,run:false,crouch:false,ang:.35,weapon:c==='h'?'taco_madeira':'pistola',swing:0,recoil:0,eat:0,search:false,t:0,reload:0,hurt:0,gear:{}});return cv.toDataURL()}
 
 let menuT=0;function drawMenuBg(){menuT+=.016;ctx.fillStyle='#1d1c24';ctx.fillRect(0,0,Wd,Hd);ctx.globalAlpha=.25;
   const names=['z1_walk1','z2_walk','z3','z1_walk2'];for(let i=0;i<10;i++){const x=((i*170+menuT*24)%(Wd+200))-100,y=Hd*.85-(i%3)*30;drawHuman(ctx,x,y,{k:['z1','z2','z3','z1'][i%4],face:1,phase:(menuT*.9+i*.37)%1,moving:true,chase:false,t:menuT,seed:i,sc:i%4===2?1.75:1.45,wide:i%4===2?1.3:1})}ctx.globalAlpha=1}
@@ -2939,7 +2991,7 @@ function readPeer(peer,rp){const pr=peer.presence||{};
   if(p&&typeof p==='object'){const num=v=>typeof v==='number'&&isFinite(v)?v:0;
     const sc=typeof p.s==='string'?p.s:'o';if(sc!==rp.sc){rp.x=null}rp.sc=sc;rp.tx=num(p.x);rp.ty=num(p.y);rp.a=num(p.a);const f=num(p.f);
     rp.tz=num(p.z);rp.moving=!!(f&1);rp.run=!!(f&2);rp.crouch=!!(f&4);rp.dead=!!(f&8);rp.face=f&16?-1:1;rp.ride=!!(f&32);rp.hp=num(p.h);rp.age=num(p.e);
-    rp.w=WEP[p.w]?p.w:'taco_madeira';rp.c=p.c==='m'?'m':'h';rp.sw=Math.max(rp.sw||0,num(p.sw));
+    rp.w=WEP[p.w]?p.w:'taco_madeira';rp.c=p.c==='m'?'m':'h';rp.sk=typeof p.k==='string'&&/^[0-9a-z]{7}$/.test(p.k)?p.k:'0000000';rp.sw=Math.max(rp.sw||0,num(p.sw));
     rp.gear={cabeca:Array.isArray(p.g)&&ITEM[p.g[0]]?p.g[0]:null,corpo:Array.isArray(p.g)&&ITEM[p.g[1]]?p.g[1]:null};
     const sh=num(p.sh);if(rp.shots!=null&&sh>rp.shots&&rp.sc===scId(SC)&&rp.x!=null){const ox=rp.x+Math.cos(rp.a)*30,oy=rp.y-32+Math.sin(rp.a)*30;
       FX.push({k:'flash',x:ox,y:oy,life:.05,max:.05});FX.push({k:'tr',x:ox,y:oy,x2:ox+Math.cos(rp.a)*420,y2:oy+Math.sin(rp.a)*420,life:.07,max:.07})}rp.shots=sh}
@@ -2979,7 +3031,7 @@ function netTick(dt){
   // minha presença
   const dead=state==='end';
   const p={s:scId(SC),x:Math.round(P.x),y:Math.round(P.y),a:Math.round(P.ang*100)/100,
-    f:(P.moving?1:0)|(P.run?2:0)|(P.crouch||P.search?4:0)|(dead?8:0)|(P.face<0?16:0)|(P.ride?32:0),h:Math.max(0,Math.round(P.hp)),w:curW(),c:P.char,
+    f:(P.moving?1:0)|(P.run?2:0)|(P.crouch||P.search?4:0)|(dead?8:0)|(P.face<0?16:0)|(P.ride?32:0),h:Math.max(0,Math.round(P.hp)),w:curW(),c:P.char,k:P.sk,
     sw:Math.round(P.swing*100)/100,sh:NET.shots,z:Math.round(P.jz||0),g:[P.gear.cabeca||0,P.gear.corpo||0],e:Math.min(999999,Math.floor(NET.age||0))};
   const patch={p};const S=NET.sent;
   const k=NET.kr.join(',');if(k!==S.k)patch.k=S.k=k;
@@ -3001,7 +3053,7 @@ function mpHudRender(){placeMp();const list=[{name:NET.name+' (você)',col:'#ece
     const nm=document.createElement('span');nm.textContent=o.name;const st=document.createElement('em');st.textContent=o.dead?'abatido':Math.max(0,Math.round(o.hp||0))+'♥';
     row.append(dot,nm,st);box.append(row)}}
 function drawRemote(r){shadow(r.x,r.y,13);const ry=r.ride?RIDE_Y:0;if(r.ride){if(r.moving)r.ha=(r.ha||0)+.25;drawHorse(r.x,r.y,r.face,r.ha||0,true,r.moving)}
-  drawRig(ctx,r.x,r.y-(r.jz||0)-ry,{char:r.c,face:r.face,phase:(r.ph||0)%1,moving:r.moving&&!r.ride,run:r.run&&r.moving&&!r.ride,crouch:r.crouch||r.ride,ang:r.a,weapon:r.w,swing:r.sw||0,recoil:0,eat:0,eatItem:null,search:false,t:performance.now()/1000,reload:0,hurt:0,gear:r.gear},false);
+  drawRig(ctx,r.x,r.y-(r.jz||0)-ry,{char:r.c,sk:r.sk,face:r.face,phase:(r.ph||0)%1,moving:r.moving&&!r.ride,run:r.run&&r.moving&&!r.ride,crouch:r.crouch||r.ride,ang:r.a,weapon:r.w,swing:r.sw||0,recoil:0,eat:0,eatItem:null,search:false,t:performance.now()/1000,reload:0,hurt:0,gear:r.gear},false);
   const y=r.y-(r.crouch||r.ride?70:86)-ry;ctx.font='10px "Silkscreen",monospace';const w=ctx.measureText(r.name).width+8;
   ctx.fillStyle='rgba(12,11,16,.75)';ctx.fillRect(r.x-w/2,y-10,w,13);txt(r.name,r.x,y,r.col);
   ctx.fillStyle='#0c0b10';ctx.fillRect(r.x-14,y+5,28,3);ctx.fillStyle='#c8352b';ctx.fillRect(r.x-14,y+5,28*clamp(r.hp/100,0,1),3)}
@@ -3172,6 +3224,31 @@ document.querySelectorAll('.charbtn').forEach(b=>b.addEventListener('click',()=>
 function start(){musInit();$('leftLbl').textContent=isFree()?'Abates':'Infectados restantes';$('menu').hidden=true;$('end').hidden=true;$('hud').hidden=false;newGame();invDirty=slotsDirty=petsDirty=whereDirty=true;cam.x=P.x;cam.y=P.y;lastT=0;if(SPAWN.loaded){$('toasts').innerHTML='';toast('Jogo carregado: Dia '+curDay+'. Seus itens estão na mochila.',null)}else if(SPAWN.sewer&&!SPAWN.carried)cutArrive();else{$('toasts').innerHTML='';toast(SPAWN.carried?'Mundo novo, com os seus itens.':'Você chegou pelo canto '+SPAWN.n+' do mapa. Aperte M para ver o mapa.',null)}
   if(NET.on&&readSave())toast('Você entrou com os seus itens salvos.',null);LOAD=null}
 $('go').addEventListener('click',()=>{const g=$('go');if(readSave()&&!g.dataset.sure){g.dataset.sure=1;g.classList.add('warn');g.textContent='TEM CERTEZA? O JOGO SALVO SERÁ SUBSTITUÍDO';return}if(NET.on)mpLeave();LOAD=null;start()});
+// ================= skin =================
+const SKP={raf:0,t:0};
+function skinSetChar(c){charSel=c;document.querySelectorAll('.charbtn').forEach(o=>o.setAttribute('aria-pressed',o.dataset.ch===c?'true':'false'));
+  document.querySelectorAll('.skch .xbtn').forEach(o=>o.setAttribute('aria-pressed',o.dataset.sc===c?'true':'false'));skinRows()}
+function skinSet(i,n){const a=skinSel.split('');a[i]=n.toString(36);skinSel=a.join('');try{localStorage.setItem('kaot-skin',skinSel)}catch(e){}skinRows();setPreviews()}
+function skinRows(){const box=$('skinRows');box.innerHTML='';const base=CH_PAL[charSel];
+  SKIN_OPT.forEach((o,i)=>{const row=document.createElement('div');row.className='skrow';const l=document.createElement('div');l.className='lbl';l.textContent=o.n;const sw=document.createElement('div');sw.className='sws';
+    const cur=parseInt(skinSel[i],36)||0,list=o.c||o.t;
+    list.forEach((col,n)=>{const b=document.createElement('button');b.className='sw';b.setAttribute('aria-pressed',n===cur?'true':'false');
+      if(o.t){b.classList.add('txt');b.textContent=col}else{const dc={pele:'skin',cabelo:'hair',jaqueta:charSel==='h'?'hood':'sleeve',camisa:'shirt',calca:'pants',botas:'boots'}[o.k];
+        b.style.background=col||base[dc];if(!col){b.classList.add('def');b.title='Original'}else b.title=o.n}
+      b.addEventListener('click',()=>skinSet(i,n));sw.append(b)});
+    row.append(l,sw);box.append(row)})}
+function skinDraw(){if($('skinPanel').hidden){SKP.raf=0;return}SKP.t+=1/60;const cv=$('skinCv'),g=cv.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,cv.width,cv.height);g.imageSmoothingEnabled=false;
+  g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(80,186,40,8,0,0,6.28);g.fill();
+  const walk=Math.floor(SKP.t/3)%2===1;g.scale(2.6,2.6);
+  drawRig(g,30,71.5,{char:charSel,sk:skinSel,face:1,phase:walk?(SKP.t*1.6)%1:0,moving:walk,run:false,crouch:false,ang:.35,weapon:charSel==='h'?'taco_madeira':'pistola',swing:0,recoil:0,eat:0,search:false,t:SKP.t,reload:0,hurt:0,gear:{}},false);
+  SKP.raf=requestAnimationFrame(skinDraw)}
+function skinOpen(){$('skinPanel').hidden=false;skinSetChar(charSel);if(!SKP.raf)SKP.raf=requestAnimationFrame(skinDraw)}
+function skinClose(){$('skinPanel').hidden=true;setPreviews();$('skinBtn').focus()}
+$('skinBtn').addEventListener('click',skinOpen);$('skinOk').addEventListener('click',skinClose);
+document.querySelectorAll('.skch .xbtn').forEach(b=>b.addEventListener('click',()=>skinSetChar(b.dataset.sc)));
+$('skinReset').addEventListener('click',()=>{skinSel='0000000';try{localStorage.setItem('kaot-skin',skinSel)}catch(e){}skinRows();setPreviews()});
+$('skinRand').addEventListener('click',()=>{skinSel=SKIN_OPT.map(o=>{const n=(o.c||o.t).length;return Math.floor(Math.random()*n).toString(36)}).join('');try{localStorage.setItem('kaot-skin',skinSel)}catch(e){}skinRows();setPreviews()});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('skinPanel').hidden){e.preventDefault();skinClose()}});
 $('contBtn').addEventListener('click',()=>{const s=readSave();if(!s)return;if(NET.on)mpLeave();const w=s.world;if(w){if(DIFF[w.diff])diffSel=w.diff;if(w.mode==='livre'||w.mode==='missao')modeSel=w.mode;syncMenuSel()}
   if(s.char.c==='h'||s.char.c==='m'){charSel=s.char.c;document.querySelectorAll('.charbtn').forEach(o=>o.setAttribute('aria-pressed',o.dataset.ch===charSel?'true':'false'))}LOAD=s;start()});
 menuSave();
