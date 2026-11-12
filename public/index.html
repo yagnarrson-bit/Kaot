@@ -3253,9 +3253,9 @@ function skinRows(){const box=$('skinRows');box.innerHTML='';const base=CH_PAL[c
       b.addEventListener('click',()=>skinSet(i,n));sw.append(b)});
     row.append(l,sw);box.append(row)})}
 function skinDraw(){if($('skinPanel').hidden){SKP.raf=0;return}SKP.t+=1/60;const cv=$('skinCv'),g=cv.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,cv.width,cv.height);g.imageSmoothingEnabled=false;
-  g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(80,186,40,8,0,0,6.28);g.fill();
+  g.fillStyle='rgba(0,0,0,.32)';g.beginPath();g.ellipse(84,191,30,6,0,0,6.28);g.fill();
   const walk=Math.floor(SKP.t/3)%2===1;g.scale(2.6,2.6);
-  drawRig(g,30,71.5,{char:charSel,sk:skinSel,face:1,phase:walk?(SKP.t*1.6)%1:0,moving:walk,run:false,crouch:false,ang:.35,weapon:charSel==='h'?'taco_madeira':'pistola',swing:0,recoil:0,eat:0,search:false,t:SKP.t,reload:0,hurt:0,gear:{}},false);
+  drawRig(g,30,73,{char:charSel,sk:skinSel,face:1,phase:walk?(SKP.t*1.6)%1:0,moving:walk,run:false,crouch:false,ang:.35,weapon:charSel==='h'?'taco_madeira':'pistola',swing:0,recoil:0,eat:0,search:false,t:SKP.t,reload:0,hurt:0,gear:{}},false);
   SKP.raf=requestAnimationFrame(skinDraw)}
 function skinOpen(){$('skinPanel').hidden=false;skinSetChar(charSel);if(!SKP.raf)SKP.raf=requestAnimationFrame(skinDraw)}
 function skinClose(){$('skinPanel').hidden=true;setPreviews();$('skinBtn').focus()}
