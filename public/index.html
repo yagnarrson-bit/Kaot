@@ -2488,8 +2488,9 @@ const SKIN_OPT=[
   {k:'calca',n:'Calça',c:[null,'#8a7350','#3b4a5e','#2a2a2e','#4d5a33','#6a6a72','#5a3a2a','#7a2a2a']},
   {k:'botas',n:'Botas',c:[null,'#3a2a1e','#1e1c20','#6a4a2a','#4d5a33','#8a2e2e','#d8d4c8']},
   {k:'extra',n:'Acessório',t:['Nada','Óculos escuros','Bandana','Barba','Óculos + bandana']},
-  {k:'capuz',n:'Capuz',t:['Original','Com capuz','Sem capuz']}];
-let skinSel='00000000';try{const v=localStorage.getItem('kaot-skin');if(/^[0-9a-z]{7,8}$/.test(v||''))skinSel=v.padEnd(8,'0')}catch(e){}
+  {k:'capuz',n:'Capuz',t:['Original','Com capuz','Sem capuz']},
+  {k:'cabelo2',n:'Penteado (sem capuz)',t:['Original','Curto','Raspado','Moicano','Rabo de cavalo','Longo','Coque','Black power','Careca']}];
+let skinSel='000000000';try{const v=localStorage.getItem('kaot-skin');if(/^[0-9a-z]{7,9}$/.test(v||''))skinSel=v.padEnd(9,'0')}catch(e){}
 const SKC={};
 function skinPal(ch,sk){const base=CH_PAL[ch]||CH_PAL.h;if(!sk||/^0+$/.test(sk))return base;const key=ch+sk;if(SKC[key])return SKC[key];
   const c={...base},v=i=>{const o=SKIN_OPT[i],n=parseInt(sk[i]||'0',36)||0;return o.c?o.c[n]||null:n},D=k=>shade(k,-.24);let k;
@@ -2497,7 +2498,17 @@ function skinPal(ch,sk){const base=CH_PAL[ch]||CH_PAL.h;if(!sk||/^0+$/.test(sk))
   if((k=v(2))){c.sleeve=k;c.sleeveD=D(k);if(ch==='h'){c.hood=k;c.hoodD=D(k)}}
   if((k=v(3))){c.shirt=k;c.shirtD=D(k)}if((k=v(4))){c.pants=k;c.pantsD=D(k)}if((k=v(5)))c.boots=k;
   c.extra=v(6)%SKIN_OPT[6].t.length;const cz=v(7);c.hd=cz===1?true:cz===2?false:ch==='h';
-  if(ch==='m'&&c.hd){c.hood=c.sleeve;c.hoodD=c.sleeveD}return SKC[key]=c}
+  if(ch==='m'&&c.hd){c.hood=c.sleeve;c.hoodD=c.sleeveD}c.hs=v(8)%SKIN_OPT[8].t.length;return SKC[key]=c}
+// penteados (cabeça virada para a direita: frente = +x, nuca = -x)
+function drawHair(g,C,st,o,ph){const H=C.hair,HD=shade(H[0]==='#'?H:'#5a3520',-.25),R=(c,x,y,w,h)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+  if(st===1){R(OLC,-7,-9,15,5);R(OLC,-7,-9,6,13);R(H,-6,-8,13,4);R(H,-6,-8,5,11);R(HD,-6,-1,3,4);R(H,4,-5,3,1.5)}
+  else if(st===2){R(HD,-5.5,-6.5,12,2.5);R(HD,-5.5,-6.5,3.5,8);R('rgba(255,255,255,.12)',-3,-6.5,6,1)}
+  else if(st===3){R(HD,-5.5,-6.5,12,1.5);R(HD,-5.5,-6.5,2.5,7);R(OLC,-5,-13,10,7);R(H,-4,-12,8,6);R(OLC,-2,-15,3,3);R(H,-1.5,-14.5,2,3);R(OLC,2.5,-14,3,3);R(H,3,-13.5,2,3);R('rgba(255,255,255,.2)',-3,-12,6,1)}
+  else if(st===4){R(H,-5.5,-6.5,12,4);R(H,-5.5,-6.5,5,10);const sw=o.moving?Math.sin(ph*2)*1.5:Math.sin(o.t*2)*.5;R(OLC,-10+sw*.3,-4,5,10+sw);R(H,-9+sw*.3,-3,3,8+sw);R('#3a231b',-6,-3,2,2)}
+  else if(st===5){R(OLC,-7,-9,15,5);R(OLC,-8.5,-9,8,21);R(H,-6,-8,13,4);R(H,-7.5,-8,6,19);R(HD,-7.5,4,6,7);R(H,4,-5,3,2);R(H,1,-5,2,4)}
+  else if(st===6){R(H,-5.5,-6.5,12,4);R(H,-5.5,-6.5,5,9);R(OLC,-9,-11,8,8);R(H,-8,-10,6,6);R(HD,-8,-6,6,2);R('rgba(255,255,255,.2)',-7,-9,3,1)}
+  else if(st===7){R(OLC,-10,-13,18,11);R(OLC,-11,-10,9,17);R(H,-9,-12,16,9);R(H,-10,-9,7,15);R(HD,-10,1,7,5);R('rgba(255,255,255,.14)',-6,-11,7,1.5);R(H,5,-4,2.5,2)}
+  else if(st===8){R('rgba(255,255,255,.22)',-3,-6,5,1.5);R('rgba(0,0,0,.12)',-5.5,-6.5,3,9)}}
 function seg(g,x1,y1,x2,y2,w,c){g.lineCap='round';g.strokeStyle=OLC;g.lineWidth=w+2;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();g.strokeStyle=c;g.lineWidth=w;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke()}
 function ik(sx,sy,tx,ty,a,b,bend){let dx=tx-sx,dy=ty-sy,d=Math.hypot(dx,dy)||.01;d=clamp(d,Math.abs(a-b)+.01,a+b-.01);const ang=Math.atan2(dy,dx);const A=Math.acos(clamp((a*a+d*d-b*b)/(2*a*d),-1,1));const e=ang+bend*A;
   return{ex:sx+Math.cos(e)*a,ey:sy+Math.sin(e)*a,hx:sx+Math.cos(ang)*d,hy:sy+Math.sin(ang)*d}}
@@ -2564,8 +2575,7 @@ function drawRig(g,x,y,o,ghost){
   g.translate(1,-TL-8);g.rotate(-lean*.4);
   g.fillStyle=OLC;g.fillRect(-6.5,-7.5,14,15);g.fillStyle=C.skin;g.fillRect(-5.5,-6.5,12,13);
   if(hd){g.fillStyle=OLC;g.fillRect(-8,-9,14,17);g.fillStyle=C.hood;g.fillRect(-7,-8,12,15);g.fillStyle=C.hoodD;g.fillRect(-7,-8,4,15);g.fillStyle=OLC;g.fillRect(0,-5,7,11);g.fillStyle=C.skin;g.fillRect(1,-4,5.5,9);g.fillStyle=C.hair;g.fillRect(1,-4,5.5,2.5);g.fillStyle=C.hood;g.fillRect(-1,-8,8,3)}
-  else if(o.char==='h'){g.fillStyle=OLC;g.fillRect(-7,-9,15,5);g.fillRect(-7,-9,6,13);g.fillStyle=C.hair;g.fillRect(-6,-8,13,4);g.fillRect(-6,-8,5,11);g.fillStyle=shade(C.hair[0]==='#'?C.hair:'#5a3520',-.25);g.fillRect(-6,-1,3,4);g.fillStyle=C.hair;g.fillRect(4,-5,3,1.5)}
-  else{g.fillStyle=C.hair;g.fillRect(-5.5,-6.5,12,4);g.fillRect(-5.5,-6.5,5,10);g.fillStyle=OLC;const sw=o.moving?Math.sin(ph*2)*1.5:Math.sin(o.t*2)*.5;g.fillRect(-10+sw*.3,-4,5,10+sw);g.fillStyle=C.hair;g.fillRect(-9+sw*.3,-3,3,8+sw);g.fillStyle='#3a231b';g.fillRect(-6,-3,2,2)}
+  else drawHair(g,C,C.hs||(o.char==='h'?1:4),o,ph);
   g.fillStyle=OLC;g.fillRect(3.5,-1.5,2,2);g.fillStyle='rgba(0,0,0,.35)';g.fillRect(3,-3.5,3,1);g.fillStyle=C.skinD;g.fillRect(4,3,2,1);g.fillRect(6,0,1,2);
   if(o.hurt>0){g.fillStyle=OLC;g.fillRect(3,-2,3,1)}
   if(C.extra){const x=C.extra;
@@ -2996,7 +3006,7 @@ function readPeer(peer,rp){const pr=peer.presence||{};
   if(p&&typeof p==='object'){const num=v=>typeof v==='number'&&isFinite(v)?v:0;
     const sc=typeof p.s==='string'?p.s:'o';if(sc!==rp.sc){rp.x=null}rp.sc=sc;rp.tx=num(p.x);rp.ty=num(p.y);rp.a=num(p.a);const f=num(p.f);
     rp.tz=num(p.z);rp.moving=!!(f&1);rp.run=!!(f&2);rp.crouch=!!(f&4);rp.dead=!!(f&8);rp.face=f&16?-1:1;rp.ride=!!(f&32);rp.hp=num(p.h);rp.age=num(p.e);
-    rp.w=WEP[p.w]?p.w:'taco_madeira';rp.c=p.c==='m'?'m':'h';rp.sk=typeof p.k==='string'&&/^[0-9a-z]{7,8}$/.test(p.k)?p.k:'00000000';rp.sw=Math.max(rp.sw||0,num(p.sw));
+    rp.w=WEP[p.w]?p.w:'taco_madeira';rp.c=p.c==='m'?'m':'h';rp.sk=typeof p.k==='string'&&/^[0-9a-z]{7,9}$/.test(p.k)?p.k:'000000000';rp.sw=Math.max(rp.sw||0,num(p.sw));
     rp.gear={cabeca:Array.isArray(p.g)&&ITEM[p.g[0]]?p.g[0]:null,corpo:Array.isArray(p.g)&&ITEM[p.g[1]]?p.g[1]:null};
     const sh=num(p.sh);if(rp.shots!=null&&sh>rp.shots&&rp.sc===scId(SC)&&rp.x!=null){const ox=rp.x+Math.cos(rp.a)*30,oy=rp.y-32+Math.sin(rp.a)*30;
       FX.push({k:'flash',x:ox,y:oy,life:.05,max:.05});FX.push({k:'tr',x:ox,y:oy,x2:ox+Math.cos(rp.a)*420,y2:oy+Math.sin(rp.a)*420,life:.07,max:.07})}rp.shots=sh}
@@ -3233,7 +3243,7 @@ $('go').addEventListener('click',()=>{const g=$('go');if(readSave()&&!g.dataset.
 const SKP={raf:0,t:0};
 function skinSetChar(c){charSel=c;document.querySelectorAll('.charbtn').forEach(o=>o.setAttribute('aria-pressed',o.dataset.ch===c?'true':'false'));
   document.querySelectorAll('.skch .xbtn').forEach(o=>o.setAttribute('aria-pressed',o.dataset.sc===c?'true':'false'));skinRows()}
-function skinSet(i,n){const a=skinSel.split('');a[i]=n.toString(36);skinSel=a.join('');try{localStorage.setItem('kaot-skin',skinSel)}catch(e){}skinRows();setPreviews()}
+function skinSet(i,n){const a=skinSel.split('');a[i]=n.toString(36);if(i===8&&n>0)a[7]='2';skinSel=a.join('');try{localStorage.setItem('kaot-skin',skinSel)}catch(e){}skinRows();setPreviews()}
 function skinRows(){const box=$('skinRows');box.innerHTML='';const base=CH_PAL[charSel];
   SKIN_OPT.forEach((o,i)=>{const row=document.createElement('div');row.className='skrow';const l=document.createElement('div');l.className='lbl';l.textContent=o.n;const sw=document.createElement('div');sw.className='sws';
     const cur=parseInt(skinSel[i],36)||0,list=o.c||o.t;
@@ -3251,7 +3261,7 @@ function skinOpen(){$('skinPanel').hidden=false;skinSetChar(charSel);if(!SKP.raf
 function skinClose(){$('skinPanel').hidden=true;setPreviews();$('skinBtn').focus()}
 $('skinBtn').addEventListener('click',skinOpen);$('skinOk').addEventListener('click',skinClose);
 document.querySelectorAll('.skch .xbtn').forEach(b=>b.addEventListener('click',()=>skinSetChar(b.dataset.sc)));
-$('skinReset').addEventListener('click',()=>{skinSel='00000000';try{localStorage.setItem('kaot-skin',skinSel)}catch(e){}skinRows();setPreviews()});
+$('skinReset').addEventListener('click',()=>{skinSel='000000000';try{localStorage.setItem('kaot-skin',skinSel)}catch(e){}skinRows();setPreviews()});
 $('skinRand').addEventListener('click',()=>{skinSel=SKIN_OPT.map(o=>{const n=(o.c||o.t).length;return Math.floor(Math.random()*n).toString(36)}).join('');try{localStorage.setItem('kaot-skin',skinSel)}catch(e){}skinRows();setPreviews()});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('skinPanel').hidden){e.preventDefault();skinClose()}});
 $('contBtn').addEventListener('click',()=>{const s=readSave();if(!s)return;if(NET.on)mpLeave();const w=s.world;if(w){if(DIFF[w.diff])diffSel=w.diff;if(w.mode==='livre'||w.mode==='missao')modeSel=w.mode;syncMenuSel()}
