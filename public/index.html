@@ -216,6 +216,8 @@ canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:c
 .charbtn:focus-visible,.go:focus-visible{outline:3px solid var(--text);outline-offset:2px}
 .keys{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 12px;font-size:13px;color:var(--muted)}
 .keys kbd{font-family:var(--display);font-size:10px;color:var(--text);background:#0c0b10;border:1px solid #3a3650;padding:1px 5px;border-radius:3px;margin-right:4px}
+.go.cont{display:flex;flex-direction:column;align-items:center;gap:4px}.go.cont span{font-family:var(--body);font-weight:400;font-size:11px;letter-spacing:0;opacity:.8}
+#menu .go.warn{border-color:#e05a4a;color:#ffb0a6}
 .go{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.08em;color:var(--night);background:var(--edge);border:0;border-radius:6px;padding:12px;cursor:pointer;box-shadow:0 4px 0 #4c4290}
 .go:active{transform:translateY(2px);box-shadow:0 2px 0 #4c4290}
 .end h2{font-family:var(--display);font-size:32px;margin:0}
@@ -385,6 +387,7 @@ canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:c
         <span><kbd>Tab / I</kbd>trocar arma</span><span><kbd>C</kbd>agachar (silencioso)</span>
         <span><kbd>B</kbd>barricada</span><span><kbd>Tab / I</kbd>inventário</span><span><kbd>M</kbd>mapa</span><span><kbd>Espaço</kbd>pular</span><span><kbd>Q</kbd>esquiva</span>
       </div>
+      <button class="go cont" id="contBtn" hidden>CONTINUAR<span id="contInfo"></span></button>
       <button class="go" id="go">DESCER PELO ESGOTO</button>
     </div>
   </div>
@@ -1808,7 +1811,7 @@ function spawnMut(i,x,y){const id=NBASE+i;if(ZL.length!==id)return;const z=mkZ('
 const mutStr=()=>MUT.map(m=>e36(m.x,3)+e36(m.y,3)).join('');
 function applyM(s){for(let i=MUT.length;i*6+6<=s.length&&i<200;i++){const x=parseInt(s.substr(i*6,3),36),y=parseInt(s.substr(i*6+3,3),36);if(!(x>=0&&y>=0))return;spawnMut(i,x,y)}}
 let shake=0;
-function update(dt){
+function update(dt){saveT-=dt;if(saveT<=0){saveT=15;saveGame()}
   stats.time=(performance.now()-stats.start-stats.paused)/1000;P.t+=dt;
   GT+=dt;{const dn=Math.floor(GT/DAY_LEN)+1;if(dn!==curDay){curDay=dn;HARV.clear();if(dn>1)toast('Amanheceu. Dia '+dn+'.'+(dn%10===9?' Amanhã um mutante vai aparecer.':''),null)}
    const nt=nightK()>.5;if(nt&&!wasNight)toast('A noite chegou. Os infectados enxergam mais longe e ficam mais rápidos.',null);wasNight=nt;
@@ -2753,8 +2756,8 @@ function hud(){
 
 // ================= inventário =================
 let pauseStart=0;
-function togglePause(){if(state==='play'){if(invOpen)toggleInv();state='pause';pauseStart=performance.now();for(const k in keys)keys[k]=false;mouse.down=false;atkTouch=false;joy=null;
-    $('pauseSub').textContent=NET.on?'No multiplayer o jogo continua rodando':'O jogo está parado';$('pauseHint').textContent=isTouch?'':'Esc também volta para o jogo';$('pause').hidden=false;$('pResume').focus()}
+function togglePause(){if(state==='play'){saveGame();if(invOpen)toggleInv();state='pause';pauseStart=performance.now();for(const k in keys)keys[k]=false;mouse.down=false;atkTouch=false;joy=null;
+    $('pauseSub').textContent=(NET.on?'No multiplayer o jogo continua rodando':'O jogo está parado')+' · progresso salvo';$('pauseHint').textContent=isTouch?'':'Esc também volta para o jogo';$('pause').hidden=false;$('pResume').focus()}
   else if(state==='pause'){state='play';if(!NET.on)stats.paused+=performance.now()-pauseStart;$('pause').hidden=true;lastT=0}}
 function toggleInv(){if(state!=='play')return;invOpen=!invOpen;if(invOpen)craftOn=false;$('invPanel').hidden=!invOpen;invHover=false;if(invOpen)renderInv()}
 const IW={trigo:.2,corda:.4,sela:3,pano:.1,polvora:.05,couro_lobo:.8,couro_javali:1,couro_urso:1.5,colete_lobo:1.5,colete_javali:2,colete_urso:2.5,metralhadora:7,amg:.03,agua:.5,energetico:.4,feijoada:.6,macarrao:.5,barra:.1,curativo:.1,bandagem:.1,kit:1,a9mm:.02,a45:.03,acart:.05,a556:.02,a308:.04,madeira:.5,pregos:.01,martelo:1,chave:.3,chapa:1.5,sucata:.3,capacete:1,colete:3,taco_madeira:1.5,taco_ferro:2.5,facao:1,machado:2.5,machado_bombeiro:3.5,pistola:.9,revolver:1.1,rifle:3.5,shotgun:3.2};
@@ -3063,14 +3066,48 @@ function respawn(){
    toast(sp.sewer?'De volta ao esgoto. Seus abates continuam contando.':'Você voltou pelo canto '+sp.n+' do mapa. Seus abates continuam contando.',null)}}
 function kit(){if(isFree()){P.weapons=['taco_madeira'];P.cur=0;P.mag={};P.ammo={};P.items={}}
   else{P.weapons=['taco_madeira','pistola'];P.cur=1;P.mag={pistola:12};P.ammo={a9mm:12};P.items={agua:1,barra:1,energetico:1,bandagem:1}}}
+// ================= salvar progresso (navegador do aparelho) =================
+// char = itens, armas, vida, cavalo e pets (vale no solo e no multiplayer). world = progresso do mundo solo (mesma semente, dia, posição, zumbis mortos, o que já foi vasculhado).
+const SAVE_KEY='kaot-save-v1';let LOAD=null,saveT=15;
+function readSave(){try{const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');return s&&s.v===1&&s.char&&Array.isArray(s.char.weapons)?s:null}catch(e){return null}}
+function charData(){return{c:P.char,hp:Math.max(1,Math.round(P.hp)),fo:Math.round(P.fo),se:Math.round(P.se),weapons:P.weapons.slice(),cur:P.cur,mag:{...P.mag},ammo:{...P.ammo},items:{...P.items},mats:{...P.mats},
+  gear:{...P.gear},gearBag:{...P.gearBag},horse:horse?{s:!!horse.saddled,n:horse.name}:null,pets:{cao:pets.cao?pets.cao.name:null,gato:pets.gato?pets.gato.name:null}}}
+function saveGame(){if(!P||state==='end'||state==='menu'||CUT.on)return;const old=readSave();const s={v:1,t:Date.now(),char:charData(),world:old&&old.world||null};
+  if(!NET.on){const out=SC===OUT,px=out?P.x:SC.b.door.x,py=out?P.y:SC.b.door.y+18;const furn=[];
+    buildings.forEach((b,bi)=>b.int.furn.forEach((f,fi)=>{if(f.done)furn.push(bi.toString(36)+'.'+fi.toString(36))}));
+    s.world={seed:GSEED,mode:modeSel,diff:diffSel,nz:NBASE,nb:buildings.length,GT:Math.round(GT*10)/10,x:Math.round(px),y:Math.round(py),time:Math.round(stats.time),kills:stats.kills,animals:stats.animals,searched:stats.searched,
+      G:genStr().slice(0,NBASE),furn:furn.join(','),cars:cars.map((c,i)=>c.done?i:-1).filter(i=>i>=0),crates:CRATES.map((c,i)=>c.done?i:-1).filter(i=>i>=0),hx:horse?Math.round(horse.x):null,hy:horse?Math.round(horse.y):null}}
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify(s))}catch(e){}}
+function applyChar(c){const num=(v,d)=>typeof v==='number'&&isFinite(v)?v:d,obj=v=>v&&typeof v==='object'?v:{};
+  P.weapons=(c.weapons||[]).filter(k=>WEP[k]);if(!P.weapons.length)P.weapons=['taco_madeira'];P.weapons.sort((a,b)=>WORDER.indexOf(a)-WORDER.indexOf(b));P.cur=clamp(num(c.cur,0)|0,0,P.weapons.length-1);
+  P.mag=obj(c.mag);P.ammo=obj(c.ammo);P.items=obj(c.items);P.mats=obj(c.mats);P.gearBag={};for(const k in obj(c.gearBag))if(ITEM[k]&&c.gearBag[k])P.gearBag[k]=1;
+  P.gear={cabeca:null,corpo:null};for(const sl of ['cabeca','corpo']){const k=obj(c.gear)[sl];if(ITEM[k]&&ITEM[k].slot===sl)P.gear[sl]=k}
+  P.hp=clamp(num(c.hp,100),1,100);P.fo=clamp(num(c.fo,100),0,100);P.se=clamp(num(c.se,100),0,100);P.reload=0;
+  horse=c.horse?{x:P.x+44,y:P.y+8,face:1,anim:0,saddled:!!c.horse.s,name:String(c.horse.n||'Trovão').slice(0,14)}:null;
+  for(const k of ['cao','gato']){const n=obj(c.pets)[k];pets[k]=n?{t:k,x:P.x+(k==='cao'?-26:26),y:P.y+6,r:9,hp:1,face:1,anim:0,tx:P.x,ty:P.y,wt:0,atk:0,hit:0,owned:true,name:String(n).slice(0,14)}:null}
+  invDirty=slotsDirty=petsDirty=true}
+function applyWorld(w){GT=w.GT||0;curDay=Math.floor(GT/DAY_LEN)+1;wasNight=nightK()>.5;
+  if(typeof w.G==='string')for(let i=0;i<Math.min(w.G.length,NBASE);i++){const v=B64.indexOf(w.G[i]);if(v<0)continue;const e=ZL[i],g=v>>1;
+    if(v&1){e.z.gen=g;if(!e.dead){zRemove(e);e.dead=true}}else if(g>0)revive(i,g)}
+  for(const p of String(w.furn||'').split(',')){if(!p)continue;const [a,b]=p.split('.').map(x=>parseInt(x,36));const B=buildings[a];if(B&&B.int.furn[b])B.int.furn[b].done=true}
+  for(const b of buildings)b.left=b.int.furn.filter(f=>f.c&&!f.done).length;
+  for(const i of w.cars||[])if(cars[i])cars[i].done=true;for(const i of w.crates||[])if(CRATES[i])CRATES[i].done=true;
+  stats.kills=w.kills|0;stats.animals=w.animals|0;stats.searched=w.searched|0;stats.start=performance.now()-(w.time||0)*1000;stats.paused=0;
+  P.x=w.x;P.y=w.y;if(horse&&w.hx!=null){horse.x=w.hx;horse.y=w.hy}}
+function menuSave(){const s=readSave(),b=$('contBtn');b.hidden=!s;$('go').classList.remove('warn');delete $('go').dataset.sure;$('go').textContent=s?'NOVO JOGO':'DESCER PELO ESGOTO';if(!s)return;
+  const w=s.world,ago=Math.max(0,Math.round((Date.now()-s.t)/60000)),quando=ago<1?'agora há pouco':ago<60?'há '+ago+' min':ago<1440?'há '+Math.round(ago/60)+' h':'há '+Math.round(ago/1440)+' dia(s)';
+  $('contInfo').textContent=(w?'Dia '+(Math.floor((w.GT||0)/DAY_LEN)+1)+' · '+(DIFF[w.diff]?DIFF[w.diff].t:'')+' · '+(w.mode==='livre'?'Livre':'Missão'):'Seus itens num mundo novo')+' · salvo '+quando}
 function newGame(){horse=null;HARV.clear();
   curDay=1;pendingMutant=false;_dl='';
-  if(!NET.on)GSEED=Math.floor(Math.random()*2147483646)+1;
+  const LW=!NET.on&&LOAD&&LOAD.world?LOAD.world:null;
+  if(!NET.on)GSEED=LW?LW.seed:Math.floor(Math.random()*2147483646)+1;
   giReset();withSeed(GSEED,newGameCore);indexZ();kit();revT=3;GT=0;MUT=[];NBASE=ZL.length;wasNight=false;Object.assign(P,{st:100,stT:0,tired:false,jz:0,jv:0,jh:0});
   SPAWN=pickSpawn();P.x=SPAWN.x;P.y=SPAWN.y;
   if(NET.on){netReset();P.x+=(Math.random()-.5)*60;P.y+=(Math.random()-.5)*30}
   stats.total=remaining();
-  if(isFree())toast('Modo livre: só o taco de madeira. Sem contagem, sobreviva o quanto quiser.',null)}
+  {const sv=NET.on?readSave():LOAD;if(sv){applyChar(sv.char);if(LW&&LW.nz===NBASE&&LW.nb===buildings.length){applyWorld(LW);SPAWN={n:'save',loaded:1}}else if(LOAD)SPAWN.carried=1;if(horse){horse.x=P.x+44;horse.y=P.y+8;if(LW&&LW.hx!=null&&SPAWN.loaded){horse.x=LW.hx;horse.y=LW.hy}}petsFollow()}}
+  saveT=15;
+  if(isFree()&&!SPAWN.loaded)toast('Modo livre: só o taco de madeira. Sem contagem, sobreviva o quanto quiser.',null)}
 // sala via servidor próprio (WebSocket), mesma interface do room do Claude
 function wsRoom(){return{join:name=>new Promise((res,rej)=>{
   const url=(location.protocol==='https:'?'wss://':'ws://')+location.host+'/ws';
@@ -3122,22 +3159,27 @@ const INTRO_B64="AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAC3hbW9vdgAAAGxtdmh
   v.muted=false;v.play().catch(()=>{v.muted=true;$('introSnd').hidden=false;v.play().catch(finish)});
   setTimeout(finish,20000)})();
 // ================= fluxo =================
-function endGame(win){if(state==='end'||state==='menu'||!P)return;state='end';NET.won=!!win;
+function endGame(win){if(state==='end'||state==='menu'||!P)return;if(win&&!NET.on){const s=readSave();try{localStorage.setItem(SAVE_KEY,JSON.stringify({v:1,t:Date.now(),char:charData(),world:null}))}catch(e){}}state='end';NET.won=!!win;
   let best={};try{best=JSON.parse(localStorage.getItem('kaot-best-'+diffSel)||'{}')}catch(e){}
   const rec=win&&(!best.time||stats.time<best.time);if(rec){best.time=stats.time;try{localStorage.setItem('kaot-best-'+diffSel,JSON.stringify(best))}catch(e){}}
   $('mapPanel').hidden=true;$('endTag').textContent=isFree()?'Modo livre'+(NET.on?' · sala '+NET.code.toUpperCase():''):win?'Missão cumprida':'Missão encerrada';$('endTitle').textContent=win?'Cidade limpa':'Agente abatido';
-  $('endText').textContent=win?'Nenhum infectado restante. A Kaot pode reabrir os portões.'+(rec?' Novo recorde de tempo.':''):(SC.kind==='out'&&dist(P.x,P.y,UX,UY)<URAD?'A radiação da usina venceu.':P.fo<=0||P.se<=0?'Fome e sede cobraram o preço.':'Os infectados te cercaram.');
+  $('endText').textContent=win?'Nenhum infectado restante. A Kaot pode reabrir os portões.'+(rec?' Novo recorde de tempo.':''):(SC.kind==='out'&&dist(P.x,P.y,UX,UY)<URAD?'A radiação da usina venceu.':P.fo<=0||P.se<=0?'Fome e sede cobraram o preço.':'Os infectados te cercaram.')+(!win&&!NET.on&&readSave()?' Você pode voltar do último salvamento em CONTINUAR, no menu.':'');
   $('endStats').innerHTML=`<span>Dificuldade</span><span>${DIFF[diffSel].t}</span><span>${NET.on?'Seus abates':'Zumbis eliminados'}</span><span>${isFree()?stats.kills:stats.kills+' / '+stats.total}</span><span>Animais hostis abatidos</span><span>${stats.animals}</span><span>Móveis vasculhados</span><span>${stats.searched}</span><span>Tempo</span><span>${fmt(stats.time)}</span>`+(best.time?`<span>Melhor tempo</span><span>${fmt(best.time)}</span>`:'');
   $('again').textContent=NET.on&&!win?'RENASCER NO ESGOTO':'VOLTAR AO ESGOTO';$('leaveBtn').hidden=!NET.on;
   $('end').hidden=false;$('hud').hidden=true;$('invPanel').hidden=true;invOpen=false;$('again').focus()}
 document.querySelectorAll('.dbtn').forEach(b=>b.addEventListener('click',()=>{diffSel=b.dataset.d;document.querySelectorAll('.dbtn').forEach(o=>o.setAttribute('aria-pressed',o===b?'true':'false'))}));
 document.querySelectorAll('.charbtn').forEach(b=>b.addEventListener('click',()=>{charSel=b.dataset.ch;document.querySelectorAll('.charbtn').forEach(o=>o.setAttribute('aria-pressed',o===b?'true':'false'))}));
-function start(){musInit();$('leftLbl').textContent=isFree()?'Abates':'Infectados restantes';$('menu').hidden=true;$('end').hidden=true;$('hud').hidden=false;newGame();invDirty=slotsDirty=petsDirty=whereDirty=true;cam.x=P.x;cam.y=P.y;lastT=0;if(SPAWN.sewer)cutArrive();else{$('toasts').innerHTML='';toast('Você chegou pelo canto '+SPAWN.n+' do mapa. Aperte M para ver o mapa.',null)}}
-$('go').addEventListener('click',()=>{if(NET.on)mpLeave();start()});
+function start(){musInit();$('leftLbl').textContent=isFree()?'Abates':'Infectados restantes';$('menu').hidden=true;$('end').hidden=true;$('hud').hidden=false;newGame();invDirty=slotsDirty=petsDirty=whereDirty=true;cam.x=P.x;cam.y=P.y;lastT=0;if(SPAWN.loaded){$('toasts').innerHTML='';toast('Jogo carregado: Dia '+curDay+'. Seus itens estão na mochila.',null)}else if(SPAWN.sewer&&!SPAWN.carried)cutArrive();else{$('toasts').innerHTML='';toast(SPAWN.carried?'Mundo novo, com os seus itens.':'Você chegou pelo canto '+SPAWN.n+' do mapa. Aperte M para ver o mapa.',null)}
+  if(NET.on&&readSave())toast('Você entrou com os seus itens salvos.',null);LOAD=null}
+$('go').addEventListener('click',()=>{const g=$('go');if(readSave()&&!g.dataset.sure){g.dataset.sure=1;g.classList.add('warn');g.textContent='TEM CERTEZA? O JOGO SALVO SERÁ SUBSTITUÍDO';return}if(NET.on)mpLeave();LOAD=null;start()});
+$('contBtn').addEventListener('click',()=>{const s=readSave();if(!s)return;if(NET.on)mpLeave();const w=s.world;if(w){if(DIFF[w.diff])diffSel=w.diff;if(w.mode==='livre'||w.mode==='missao')modeSel=w.mode;syncMenuSel()}
+  if(s.char.c==='h'||s.char.c==='m'){charSel=s.char.c;document.querySelectorAll('.charbtn').forEach(o=>o.setAttribute('aria-pressed',o.dataset.ch===charSel?'true':'false'))}LOAD=s;start()});
+menuSave();
+addEventListener('visibilitychange',()=>{if(document.hidden)saveGame()});addEventListener('pagehide',saveGame);
 document.querySelectorAll('.mbtn').forEach(b=>b.addEventListener('click',()=>{modeSel=b.dataset.m;syncMenuSel()}));
 $('mpPublic').addEventListener('click',()=>mpEnter('public'));$('mpCreate').addEventListener('click',()=>mpEnter(true));$('mpJoin').addEventListener('click',()=>mpEnter(false));
 $('code').addEventListener('keydown',e=>{if(e.key==='Enter')mpEnter(false)});
-const toMenu=()=>{if(NET.on)mpLeave();if(P&&P.drv)P.drv=null;$('pause').hidden=true;$('end').hidden=true;$('hud').hidden=true;$('invPanel').hidden=true;invOpen=false;$('mapPanel').hidden=true;$('menu').hidden=false;P=null;state='menu'};
+const toMenu=()=>{saveGame();if(NET.on)mpLeave();if(P&&P.drv)P.drv=null;$('pause').hidden=true;$('end').hidden=true;$('hud').hidden=true;$('invPanel').hidden=true;invOpen=false;$('mapPanel').hidden=true;$('menu').hidden=false;P=null;state='menu';menuSave()};
 $('leaveBtn').addEventListener('click',toMenu);$('pMenu').addEventListener('click',toMenu);$('pResume').addEventListener('click',togglePause);
 $('menuBtn').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();setTouch();if(state==='play')togglePause()},{passive:false});$('menuBtn').addEventListener('click',()=>{if(state==='play')togglePause()});$('mpExit').addEventListener('click',toMenu);$('bagBtn').innerHTML='<img src="'+SPR.ic_bag+'" alt="">';
 {const pickW=e=>{const s=e.target.closest('.slot');if(!s||state!=='play'||!P)return;e.preventDefault();const i=+s.dataset.i;if(i>=0&&i<P.weapons.length&&i!==P.cur){P.cur=i;P.reload=0;slotsDirty=true}};
