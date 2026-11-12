@@ -2487,15 +2487,17 @@ const SKIN_OPT=[
   {k:'camisa',n:'Camisa',c:[null,'#3f566b','#77714f','#d8d4c8','#2a2a2e','#8a2e2e','#3f6a46','#c98a2e','#5a7aa8']},
   {k:'calca',n:'Calça',c:[null,'#8a7350','#3b4a5e','#2a2a2e','#4d5a33','#6a6a72','#5a3a2a','#7a2a2a']},
   {k:'botas',n:'Botas',c:[null,'#3a2a1e','#1e1c20','#6a4a2a','#4d5a33','#8a2e2e','#d8d4c8']},
-  {k:'extra',n:'Acessório',t:['Nada','Óculos escuros','Bandana','Barba','Óculos + bandana']}];
-let skinSel='0000000';try{const v=localStorage.getItem('kaot-skin');if(/^[0-9a-z]{7}$/.test(v||''))skinSel=v}catch(e){}
+  {k:'extra',n:'Acessório',t:['Nada','Óculos escuros','Bandana','Barba','Óculos + bandana']},
+  {k:'capuz',n:'Capuz',t:['Original','Com capuz','Sem capuz']}];
+let skinSel='00000000';try{const v=localStorage.getItem('kaot-skin');if(/^[0-9a-z]{7,8}$/.test(v||''))skinSel=v.padEnd(8,'0')}catch(e){}
 const SKC={};
-function skinPal(ch,sk){const base=CH_PAL[ch]||CH_PAL.h;if(!sk||sk==='0000000')return base;const key=ch+sk;if(SKC[key])return SKC[key];
+function skinPal(ch,sk){const base=CH_PAL[ch]||CH_PAL.h;if(!sk||/^0+$/.test(sk))return base;const key=ch+sk;if(SKC[key])return SKC[key];
   const c={...base},v=i=>{const o=SKIN_OPT[i],n=parseInt(sk[i]||'0',36)||0;return o.c?o.c[n]||null:n},D=k=>shade(k,-.24);let k;
   if((k=v(0))){c.skin=k;c.skinD=shade(k,-.16)}if((k=v(1)))c.hair=k;
   if((k=v(2))){c.sleeve=k;c.sleeveD=D(k);if(ch==='h'){c.hood=k;c.hoodD=D(k)}}
   if((k=v(3))){c.shirt=k;c.shirtD=D(k)}if((k=v(4))){c.pants=k;c.pantsD=D(k)}if((k=v(5)))c.boots=k;
-  c.extra=v(6)%SKIN_OPT[6].t.length;return SKC[key]=c}
+  c.extra=v(6)%SKIN_OPT[6].t.length;const cz=v(7);c.hd=cz===1?true:cz===2?false:ch==='h';
+  if(ch==='m'&&c.hd){c.hood=c.sleeve;c.hoodD=c.sleeveD}return SKC[key]=c}
 function seg(g,x1,y1,x2,y2,w,c){g.lineCap='round';g.strokeStyle=OLC;g.lineWidth=w+2;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();g.strokeStyle=c;g.lineWidth=w;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke()}
 function ik(sx,sy,tx,ty,a,b,bend){let dx=tx-sx,dy=ty-sy,d=Math.hypot(dx,dy)||.01;d=clamp(d,Math.abs(a-b)+.01,a+b-.01);const ang=Math.atan2(dy,dx);const A=Math.acos(clamp((a*a+d*d-b*b)/(2*a*d),-1,1));const e=ang+bend*A;
   return{ex:sx+Math.cos(e)*a,ey:sy+Math.sin(e)*a,hx:sx+Math.cos(ang)*d,hy:sy+Math.sin(ang)*d}}
@@ -2504,7 +2506,7 @@ function poseFromP(face,ghost,crouchOverride){
     ang:P.ang,weapon:curW(),swing:ghost?0:P.swing,recoil:ghost?0:P.recoil,eat:ghost?0:P.eat,eatItem:P.eatItem,search:!ghost&&!!P.search,t:P.t,reload:ghost?0:P.reload,hurt:ghost?0:(P.hurt||0),gear:P.gear}}
 function drawPlayerRig(x,y,face,o){const pose=poseFromP(face,!!o.ghost,o.crouch);ctx.save();if(o.ghost){ctx.globalAlpha=o.ghost}drawRig(ctx,x,y,pose,!!o.ghost);ctx.restore()}
 function drawRig(g,x,y,o,ghost){
-  const C=skinPal(o.char,o.sk),W=WEP[o.weapon];const ph=o.phase*6.2832;
+  const C=skinPal(o.char,o.sk),W=WEP[o.weapon],hd=C.hd!=null?C.hd:o.char==='h';const ph=o.phase*6.2832;
   g.save();g.translate(x,y);if(o.face<0)g.scale(-1,1);
   if(ghost){g.globalCompositeOperation='source-over';}
   let hipY=-28,bob=0,lean=0,legs;
@@ -2552,14 +2554,17 @@ function drawRig(g,x,y,o,ghost){
   g.save();g.translate(hx,hy);g.rotate(lean);
   g.fillStyle=OLC;g.fillRect(-7.5,-TL-2.5,15,TL+5);g.fillStyle=C.shirt;g.fillRect(-6.5,-TL-1.5,13,TL+3);g.fillStyle=C.shirtD;g.fillRect(-6.5,-TL-1.5,3,TL+3);
   if(o.char==='m'){g.fillStyle=C.sleeve;g.fillRect(-6.5,-TL-1.5,13,4);g.fillStyle='#5f5a3e';g.fillRect(-4,-8,4,4);g.fillRect(1.5,-8,4,4);g.fillStyle='#2b2a1e';g.fillRect(-6.5,-TL+2.5,13,1)}
-  else{g.fillStyle=C.hood;g.fillRect(-7.5,-TL-2,15,6);g.fillStyle=C.hoodD;g.fillRect(-7.5,-TL+3,4,6);g.fillRect(3.5,-TL+3,4,3)}
+  else if(hd){g.fillStyle=C.hood;g.fillRect(-7.5,-TL-2,15,6);g.fillStyle=C.hoodD;g.fillRect(-7.5,-TL+3,4,6);g.fillRect(3.5,-TL+3,4,3)}
+  else{g.fillStyle=OLC;g.fillRect(-8.5,-TL-3,9,7);g.fillStyle=C.hood;g.fillRect(-7.5,-TL-2,15,4);g.fillStyle=C.hoodD;g.fillRect(-7.5,-TL-2,7,5)}
+  if(o.char==='m'&&hd){g.fillStyle=C.hood;g.fillRect(-7.5,-TL-2,15,5);g.fillStyle=C.hoodD;g.fillRect(-7.5,-TL+3,4,5)}
   g.fillStyle=C.belt;g.fillRect(-6.5,-1.5,13,3);g.fillStyle='#c9a24a';g.fillRect(2,-1.5,2,3);
   if(o.gear&&VEST[o.gear.corpo]){const V=VEST[o.gear.corpo];g.fillStyle=OLC;g.fillRect(-7.5,-TL+1,15,TL-2);g.fillStyle=V[0];g.fillRect(-6.5,-TL+2,13,TL-4);g.fillStyle=V[1];g.fillRect(-4,-8,4,4);g.fillRect(1,-8,4,4);
     if(o.gear.corpo!=='colete'){g.fillStyle=V[1];g.fillRect(-6.5,-TL+2,3,TL-4);g.fillStyle=V[2];g.fillRect(-.5,-TL+3,1,2);g.fillRect(-.5,-TL+7,1,2)}}
   // cabeça
   g.translate(1,-TL-8);g.rotate(-lean*.4);
   g.fillStyle=OLC;g.fillRect(-6.5,-7.5,14,15);g.fillStyle=C.skin;g.fillRect(-5.5,-6.5,12,13);
-  if(o.char==='h'){g.fillStyle=OLC;g.fillRect(-8,-9,14,17);g.fillStyle=C.hood;g.fillRect(-7,-8,12,15);g.fillStyle=C.hoodD;g.fillRect(-7,-8,4,15);g.fillStyle=OLC;g.fillRect(0,-5,7,11);g.fillStyle=C.skin;g.fillRect(1,-4,5.5,9);g.fillStyle=C.hair;g.fillRect(1,-4,5.5,2.5);g.fillStyle=C.hood;g.fillRect(-1,-8,8,3)}
+  if(hd){g.fillStyle=OLC;g.fillRect(-8,-9,14,17);g.fillStyle=C.hood;g.fillRect(-7,-8,12,15);g.fillStyle=C.hoodD;g.fillRect(-7,-8,4,15);g.fillStyle=OLC;g.fillRect(0,-5,7,11);g.fillStyle=C.skin;g.fillRect(1,-4,5.5,9);g.fillStyle=C.hair;g.fillRect(1,-4,5.5,2.5);g.fillStyle=C.hood;g.fillRect(-1,-8,8,3)}
+  else if(o.char==='h'){g.fillStyle=OLC;g.fillRect(-7,-9,15,5);g.fillRect(-7,-9,6,13);g.fillStyle=C.hair;g.fillRect(-6,-8,13,4);g.fillRect(-6,-8,5,11);g.fillStyle=shade(C.hair[0]==='#'?C.hair:'#5a3520',-.25);g.fillRect(-6,-1,3,4);g.fillStyle=C.hair;g.fillRect(4,-5,3,1.5)}
   else{g.fillStyle=C.hair;g.fillRect(-5.5,-6.5,12,4);g.fillRect(-5.5,-6.5,5,10);g.fillStyle=OLC;const sw=o.moving?Math.sin(ph*2)*1.5:Math.sin(o.t*2)*.5;g.fillRect(-10+sw*.3,-4,5,10+sw);g.fillStyle=C.hair;g.fillRect(-9+sw*.3,-3,3,8+sw);g.fillStyle='#3a231b';g.fillRect(-6,-3,2,2)}
   g.fillStyle=OLC;g.fillRect(3.5,-1.5,2,2);g.fillStyle='rgba(0,0,0,.35)';g.fillRect(3,-3.5,3,1);g.fillStyle=C.skinD;g.fillRect(4,3,2,1);g.fillRect(6,0,1,2);
   if(o.hurt>0){g.fillStyle=OLC;g.fillRect(3,-2,3,1)}
@@ -2991,7 +2996,7 @@ function readPeer(peer,rp){const pr=peer.presence||{};
   if(p&&typeof p==='object'){const num=v=>typeof v==='number'&&isFinite(v)?v:0;
     const sc=typeof p.s==='string'?p.s:'o';if(sc!==rp.sc){rp.x=null}rp.sc=sc;rp.tx=num(p.x);rp.ty=num(p.y);rp.a=num(p.a);const f=num(p.f);
     rp.tz=num(p.z);rp.moving=!!(f&1);rp.run=!!(f&2);rp.crouch=!!(f&4);rp.dead=!!(f&8);rp.face=f&16?-1:1;rp.ride=!!(f&32);rp.hp=num(p.h);rp.age=num(p.e);
-    rp.w=WEP[p.w]?p.w:'taco_madeira';rp.c=p.c==='m'?'m':'h';rp.sk=typeof p.k==='string'&&/^[0-9a-z]{7}$/.test(p.k)?p.k:'0000000';rp.sw=Math.max(rp.sw||0,num(p.sw));
+    rp.w=WEP[p.w]?p.w:'taco_madeira';rp.c=p.c==='m'?'m':'h';rp.sk=typeof p.k==='string'&&/^[0-9a-z]{7,8}$/.test(p.k)?p.k:'00000000';rp.sw=Math.max(rp.sw||0,num(p.sw));
     rp.gear={cabeca:Array.isArray(p.g)&&ITEM[p.g[0]]?p.g[0]:null,corpo:Array.isArray(p.g)&&ITEM[p.g[1]]?p.g[1]:null};
     const sh=num(p.sh);if(rp.shots!=null&&sh>rp.shots&&rp.sc===scId(SC)&&rp.x!=null){const ox=rp.x+Math.cos(rp.a)*30,oy=rp.y-32+Math.sin(rp.a)*30;
       FX.push({k:'flash',x:ox,y:oy,life:.05,max:.05});FX.push({k:'tr',x:ox,y:oy,x2:ox+Math.cos(rp.a)*420,y2:oy+Math.sin(rp.a)*420,life:.07,max:.07})}rp.shots=sh}
@@ -3246,7 +3251,7 @@ function skinOpen(){$('skinPanel').hidden=false;skinSetChar(charSel);if(!SKP.raf
 function skinClose(){$('skinPanel').hidden=true;setPreviews();$('skinBtn').focus()}
 $('skinBtn').addEventListener('click',skinOpen);$('skinOk').addEventListener('click',skinClose);
 document.querySelectorAll('.skch .xbtn').forEach(b=>b.addEventListener('click',()=>skinSetChar(b.dataset.sc)));
-$('skinReset').addEventListener('click',()=>{skinSel='0000000';try{localStorage.setItem('kaot-skin',skinSel)}catch(e){}skinRows();setPreviews()});
+$('skinReset').addEventListener('click',()=>{skinSel='00000000';try{localStorage.setItem('kaot-skin',skinSel)}catch(e){}skinRows();setPreviews()});
 $('skinRand').addEventListener('click',()=>{skinSel=SKIN_OPT.map(o=>{const n=(o.c||o.t).length;return Math.floor(Math.random()*n).toString(36)}).join('');try{localStorage.setItem('kaot-skin',skinSel)}catch(e){}skinRows();setPreviews()});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('skinPanel').hidden){e.preventDefault();skinClose()}});
 $('contBtn').addEventListener('click',()=>{const s=readSave();if(!s)return;if(NET.on)mpLeave();const w=s.world;if(w){if(DIFF[w.diff])diffSel=w.diff;if(w.mode==='livre'||w.mode==='missao')modeSel=w.mode;syncMenuSel()}
