@@ -2536,7 +2536,7 @@ function drawRig(g,x,y,o,ghost){
   g.translate(lungeX,0);
   // pernas (FK)
   const L1=14,L2=14;const leg=(l,dxh,col,dark)=>{const kx=hx+dxh+Math.sin(l.t)*L1,ky=hy+Math.cos(l.t)*L1;const a2=l.t-l.k;let fx=kx+Math.sin(a2)*L2,fy=ky+Math.cos(a2)*L2;if(fy>0){fy=0}
-    seg(g,hx+dxh,hy,kx,ky,6.5,col);seg(g,kx,ky,fx,fy,5.5,col);
+    seg(g,hx+dxh,hy,kx,ky,6.5,col);{const dl=Math.hypot(fx-kx,fy-ky)||1;seg(g,kx,ky,fx-(fx-kx)/dl*3,fy-(fy-ky)/dl*3,5.5,col)}
     g.fillStyle=OLC;g.fillRect(fx-3.5,fy-4.5,10,6);g.fillStyle=dark?shade(C.boots,-.2):C.boots;g.fillRect(fx-2.5,fy-3.5,8,4);g.fillStyle='rgba(255,255,255,.12)';g.fillRect(fx-2.5,fy-3.5,8,1)};
   // braços: alvos das mãos conforme a arma e a ação
   const aim=clamp(Math.atan2(Math.sin(o.ang),Math.abs(Math.cos(o.ang))),-1.2,1.2)-lean*.6;
@@ -2620,7 +2620,7 @@ function drawHuman(g,x,y,o){
   const hx=0,hy=-28+bob,TL=17,sx=Math.sin(lean)*TL,sy=hy-Math.cos(lean)*TL;
   const L1=14,L2=14;
   const leg=(l,dxh,col,dark)=>{const kx=hx+dxh+Math.sin(l.t)*L1,ky=hy+Math.cos(l.t)*L1;const a2=l.t-l.k;let fx=kx+Math.sin(a2)*L2,fy=ky+Math.cos(a2)*L2;if(fy>0){fy=0}
-    seg(g,hx+dxh,hy,kx,ky,6.5+aw,col);seg(g,kx,ky,fx,fy,5.5+aw,col);
+    seg(g,hx+dxh,hy,kx,ky,6.5+aw,col);{const dl=Math.hypot(fx-kx,fy-ky)||1;seg(g,kx,ky,fx-(fx-kx)/dl*3,fy-(fy-ky)/dl*3,5.5+aw,col)}
     g.fillStyle=OLC;g.fillRect(fx-3.5,fy-4.5,10,6);g.fillStyle=dark?shade(C.boots,-.2):C.boots;g.fillRect(fx-2.5,fy-3.5,8,4);g.fillStyle='rgba(255,255,255,.12)';g.fillRect(fx-2.5,fy-3.5,8,1)};
   const SF={x:sx+1.5,y:sy+2},SB={x:sx-1.5,y:sy+2};
   let handF,handB;
