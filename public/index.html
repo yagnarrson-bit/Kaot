@@ -3246,8 +3246,8 @@ function skinSetChar(c){charSel=c;document.querySelectorAll('.charbtn').forEach(
 function skinSet(i,n){const a=skinSel.split('');a[i]=n.toString(36);if(i===8&&n>0)a[7]='2';skinSel=a.join('');try{localStorage.setItem('kaot-skin',skinSel)}catch(e){}skinRows();setPreviews()}
 function skinRows(){const box=$('skinRows');box.innerHTML='';const base=CH_PAL[charSel];
   SKIN_OPT.forEach((o,i)=>{const row=document.createElement('div');row.className='skrow';const l=document.createElement('div');l.className='lbl';l.textContent=o.n;const sw=document.createElement('div');sw.className='sws';
-    const cur=parseInt(skinSel[i],36)||0,list=o.c||o.t;
-    list.forEach((col,n)=>{const b=document.createElement('button');b.className='sw';b.setAttribute('aria-pressed',n===cur?'true':'false');
+    let cur=parseInt(skinSel[i],36)||0;const list=o.c||o.t;if(o.k==='capuz'&&!cur)cur=charSel==='h'?1:2;
+    list.forEach((col,n)=>{if(o.k==='capuz'&&n===0)return;const b=document.createElement('button');b.className='sw';b.setAttribute('aria-pressed',n===cur?'true':'false');
       if(o.t){b.classList.add('txt');b.textContent=col}else{const dc={pele:'skin',cabelo:'hair',jaqueta:charSel==='h'?'hood':'sleeve',camisa:'shirt',calca:'pants',botas:'boots'}[o.k];
         b.style.background=col||base[dc];if(!col){b.classList.add('def');b.title='Original'}else b.title=o.n}
       b.addEventListener('click',()=>skinSet(i,n));sw.append(b)});
