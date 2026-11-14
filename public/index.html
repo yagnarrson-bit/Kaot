@@ -1116,8 +1116,8 @@ function genWorld(){
   const shops=['delegacia','mercado','farmacia','posto','oficina','padaria','ferramentas','mercado','padaria','farmacia'].sort(()=>rnd()-.5);
   const ht=['casa_simples','casa_alvenaria','casa_moderna','casa_grande','casa_popular','casa_popular'];
   const city=[];for(let i=0;i<30;i++)city.push(ht[Math.floor(rnd()*ht.length)]);shops.forEach((s,i)=>city.splice(1+i*2,0,s));
-  let qi=0;const row=(roadTop,a,b,q,gap)=>{let x=a+R(0,30);while(qi<q.length){const ty=q[qi];const isF=ty.startsWith('fab_'),isH=HOUSE_TYPES.includes(ty),isS=SHOP_TYPES.includes(ty);
-      const ks=q.keys||(q.keys=[]);const key=isH?(ks[qi]||(ks[qi]='hs_'+ty+'_'+Math.floor(rnd()*HVAR))):isS?'sh_'+ty:ty;const [w,h]=isF?[440,330]:DIM[key];if(x+w>b)break;
+  let qi=0;const KC=new Map();const row=(roadTop,a,b,q,gap)=>{let x=a+R(0,30);while(qi<q.length){const ty=q[qi];const isF=ty.startsWith('fab_'),isH=HOUSE_TYPES.includes(ty),isS=SHOP_TYPES.includes(ty);
+      let ks=KC.get(q);if(!ks)KC.set(q,ks=[]);const key=isH?(ks[qi]||(ks[qi]='hs_'+ty+'_'+Math.floor(rnd()*HVAR))):isS?'sh_'+ty:ty;const [w,h]=isF?[440,330]:DIM[key];if(x+w>b)break;
       const bottom=roadTop-16;const sub=isF?ty.slice(4):null;const T=isF?'fabrica':ty;
       const rect=isF?{x:x+22,y:bottom-176,w:396,h:168}:(isH||isS)?{x:x+10,y:bottom-h*.68,w:w-20,h:h*.66}:{x:x+w*.14,y:bottom-h*.6,w:w*.72,h:h*.48};
       const doorX=(isH||isS)?HM[key].doorX:DOORX[T];
@@ -3037,6 +3037,8 @@ function netTick(dt){
     if(peer.presence!==rp.last){rp.last=peer.presence;readPeer(peer,rp)}}
   for(const [k,r] of RP)if(!alive.has(k)){RP.delete(k);toast(r.name+' saiu da sala.',null);chatAdd('',null,r.name+' saiu.',true)}
   NET.host=host===NET.me;
+  // mapa diferente do anfitrião (entraram ao mesmo tempo ou a presença dele chegou atrasada): troca para o mundo dele, mantendo os itens
+  if(!NET.host&&hostP){const G=hostP.presence.g;if(G&&Number.isInteger(G.s)&&G.s>0&&G.s!==GSEED&&(G.m==='missao'||G.m==='livre')&&DIFF[G.d]&&performance.now()-(NET.rsT||0)>4000&&mpResync(G,hr[0]))return}
   if(!NET.host&&hostP){const hp=hostP.presence;if(typeof hp.M==='string')applyM(hp.M);if(typeof hp.D==='number'&&isFinite(hp.D)&&hp.D>=0){if(Math.abs(hp.D-GT)>3)GT=hp.D;else GT+=(hp.D-GT)*.2}
     if(typeof hp.G==='string'&&hp.G!==NET.lastG&&applyG(hp.G)!==false)NET.lastG=hp.G}
   // dono da cena: o menor id entre quem está na mesma cena
@@ -3098,7 +3100,7 @@ async function mpEnter(kind){const creating=kind===true||kind==='create',pub=kin
   if(pub){// partida pública: procura a primeira sala pública com vaga; se ninguém estiver jogando, abre uma nova (modo livre, sem fim)
     for(let i=1;i<=40&&!g;i++){mpMsg('Procurando partida pública…');
       try{r=await NET.room.join('kaot-pub'+i)}catch(e){r=null;if(e&&e.code==='limit_reached')continue;mpSetBusy(false);mpMsg(joinErr(e));return}
-      r.presence({n:NET.name}).catch(()=>{});await new Promise(res=>setTimeout(res,onServer()?400:1500));
+      r.presence({n:NET.name}).catch(()=>{});await new Promise(res=>setTimeout(res,onServer()?1000:1800));
       if(othersIn(r)){mpMsg('Entrando na partida pública '+i+'…');g=await mpWaitHost(r,6000)}
       if(!g){GSEED=Math.floor(Math.random()*2147483646)+1;NET.rank=0;g={s:GSEED,m:'livre',d:diffSel,r:0}}
       label='PÚBLICA '+i}
@@ -3116,6 +3118,14 @@ async function mpEnter(kind){const creating=kind===true||kind==='create',pub=kin
   r.onConnection(c=>{if(NET.r===r)$('mpCode').classList.toggle('off',!c)},()=>{});
   mpSetBusy(false);mpMsg('');$('mpCode').textContent=label;$('mpHud').hidden=false;$('chat').hidden=false;$('chatLog').innerHTML='';chatAdd('',null,isTouch?'Toque em CHAT para conversar.':'Aperte Enter para conversar com os outros jogadores.',true);
   start()}
+function mpResync(G,hr){if(!P||state==='menu'||state==='end'||CUT.on)return false;NET.rsT=performance.now();
+  const cd=charData(),wasOut=SC===OUT&&!P.drv,ox=P.x,oy=P.y;
+  GSEED=G.s;modeSel=G.m;diffSel=G.d;syncMenuSel();NET.rank=Math.min(hr,1e6)+1;const g={s:G.s,m:G.m,d:G.d,r:NET.rank};try{NET.r.presence({g})}catch(e){}
+  const st=state;newGame();applyChar(cd);
+  if(wasOut&&!inSolid(OUT,ox,oy,18)&&!inLake(ox,oy,18)){P.x=ox;P.y=oy}
+  if(horse){horse.x=P.x+44;horse.y=P.y+8}petsFollow();
+  state=st==='pause'||st==='map'?st:'play';$('leftLbl').textContent=isFree()?'Abates':'Infectados restantes';invDirty=slotsDirty=petsDirty=whereDirty=true;cam.x=P.x;cam.y=P.y;
+  toast('Seu mapa estava diferente do anfitrião da sala. Sincronizado! Seus itens continuam com você.',null);return true}
 function mpLeave(){const r=NET.r;NET.r=null;NET.on=false;RP.clear();$('mpHud').hidden=true;placeMp();$('chat').hidden=true;chatClose();if(r)r.leave().catch(()=>{})}
 function syncMenuSel(){document.querySelectorAll('.dbtn').forEach(o=>o.setAttribute('aria-pressed',o.dataset.d===diffSel?'true':'false'));
   document.querySelectorAll('.mbtn').forEach(o=>o.setAttribute('aria-pressed',o.dataset.m===modeSel?'true':'false'))}
