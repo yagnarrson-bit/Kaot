@@ -208,7 +208,7 @@ canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:c
 .story strong{color:var(--text);font-weight:600}
 .chars{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .charbtn{font:inherit;color:var(--text);background:var(--panel-2);border:2px solid #3a3650;border-radius:6px;padding:10px;display:flex;align-items:flex-end;gap:10px;cursor:pointer;text-align:left}
-.charbtn img{height:64px;image-rendering:pixelated}
+.charbtn img{height:92px;image-rendering:pixelated}
 .charbtn[aria-pressed="true"]{border-color:var(--edge);background:#2f2a48}
 .diffs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .dbtn{font:inherit;color:var(--text);background:var(--panel-2);border:2px solid #3a3650;border-radius:6px;padding:8px 6px;display:flex;flex-direction:column;gap:2px;align-items:center;cursor:pointer;text-align:center}
@@ -2828,8 +2828,8 @@ function drawBird(g,a,x,y,o){
   g.fillStyle=ch?OLC:'#e8e8f0';g.fillRect(hx+1,hy-2,2,2);if(!ch){g.fillStyle=OLC;g.fillRect(hx+2,hy-1.5,1,1)}
   g.restore()}
 
-function charPreview(c){const cv=document.createElement('canvas');cv.width=72;cv.height=96;const g=cv.getContext('2d');g.scale(1.4,1.4);
-  drawRig(g,24,66,{char:c,sk:skinSel,face:1,phase:0,moving:false,run:false,crouch:false,ang:.35,weapon:c==='h'?'taco_madeira':'pistola',swing:0,recoil:0,eat:0,search:false,t:0,reload:0,hurt:0,gear:{}});return cv.toDataURL()}
+function charPreview(c){const cv=document.createElement('canvas');cv.width=132;cv.height=168;const g=cv.getContext('2d');g.imageSmoothingEnabled=false;g.scale(2.3,2.3);g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(27,69,13,3.5,0,0,6.28);g.fill();
+  drawRig(g,27,69,{char:c,sk:skinSel,face:1,phase:0,moving:false,run:false,crouch:false,ang:.35,weapon:c==='h'?'taco_madeira':'pistola',swing:0,recoil:0,eat:0,search:false,t:0,reload:0,hurt:0,gear:{}});return cv.toDataURL()}
 
 let menuT=0;function drawMenuBg(){menuT+=.016;ctx.fillStyle='#1d1c24';ctx.fillRect(0,0,Wd,Hd);ctx.globalAlpha=.25;
   const names=['z1_walk1','z2_walk','z3','z1_walk2'];for(let i=0;i<10;i++){const x=((i*170+menuT*24)%(Wd+200))-100,y=Hd*.85-(i%3)*30;drawHuman(ctx,x,y,{k:['z1','z2','z3','z1'][i%4],face:1,phase:(menuT*.9+i*.37)%1,moving:true,chase:false,t:menuT,seed:i,sc:i%4===2?1.75:1.45,wide:i%4===2?1.3:1})}ctx.globalAlpha=1}
