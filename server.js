@@ -12,13 +12,16 @@ const MAX_PRES = 8 * 1024;      // tamanho máximo da presença de um jogador
 const MAX_RATE = 60;            // mensagens por segundo por jogador
 
 const page = fs.readFileSync(path.join(__dirname, 'public', 'index.html'));
+const pageGz = require('zlib').gzipSync(page, { level: 9 }); // versão compactada: carrega mais rápido
 
 const server = http.createServer((req, res) => {
   const url = req.url.split('?')[0];
   if (url === '/' || url === '/index.html') {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
-    return res.end(page);
+    const gz = /gzip/i.test(req.headers['accept-encoding'] || '');
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache', 'Vary': 'Accept-Encoding', ...(gz ? { 'Content-Encoding': 'gzip' } : {}) });
+    return res.end(gz ? pageGz : page);
   }
+  if (url === '/favicon.ico') { res.writeHead(204); return res.end(); }
   if (url === '/health') { res.writeHead(200, { 'Content-Type': 'text/plain' }); return res.end('ok'); }
   res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('não encontrado');
 });

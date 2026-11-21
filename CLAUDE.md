@@ -10,7 +10,7 @@ Jogo de sobrevivência zumbi em pixel art, visto de cima (3/4), feito num **úni
 | Arquivo | O que é |
 |---|---|
 | `public/index.html` | O jogo inteiro (~2,4 MB). |
-| `server.js` | Servidor Node (WebSocket `ws`). Entrega o jogo em `/` e repassa a "presença" dos jogadores de cada sala em `/ws`. `/health` responde ok. Máx. 8 por sala. |
+| `server.js` | Servidor Node (WebSocket `ws`). Entrega o jogo em `/` (compactado com gzip) e repassa a "presença" dos jogadores de cada sala em `/ws`. `/health` responde ok. Máx. 8 por sala. |
 | `package.json`, `render.yaml` | Deploy no Render (plano grátis). Build `npm install`, start `node server.js`. |
 | `LEIA-ME.md` | Passo a passo de deploy para o dono. |
 | `tools/` | Ferramentas de teste (Playwright + sala simulada). Ver "Como testar". |
@@ -53,6 +53,7 @@ Deploy: o repositório no GitHub (`yagnarrson-bit/Kaot`) está ligado ao Render 
 - **Multiplayer (presença)**: cada jogador manda em `presence` `p` (posição/estado), `k` (mortes), `h` (golpes), `z` (posições dos zumbis se for dono da cena), `dr`/`pk` (itens largados/pegos), `g` (semente/modo/dificuldade/rank). O anfitrião (menor `rank` = quem entrou primeiro) manda `G` (estado vivo/morto de todos os zumbis, 1 caractere por zumbi), `D` (relógio do dia) e `M` (mutantes).
   - **Dono da cena** (quem manda as posições `z` dos zumbis): quem está há mais tempo naquela cena (`NET.age`, enviado em `p.e`); empate de até 3 s → menor id. Assim quem sai de uma casa recebe as posições atuais em vez de mandar as antigas.
   - **Limites da sala do Claude**: cada string ≤ 1 KB e presença total ≤ 4 KB. Por isso o total de zumbis (`DIFF`: 380/560/820) precisa manter `G` < 1024 caracteres.
+- **Jogador dormindo (multiplayer)**: presença parada há mais de 5 s (`asleep`, campo `seen`; a presença tem um batimento `hb`) não conta para anfitrião nem dono de cena. Quem volta de um jogo minimizado (`visibilitychange`, mais de 4 s) zera `NET.age` e sobe o próprio `rank` para não sobrescrever o mundo com dados velhos.
 - **Dia e noite**: `DAY_LEN=150` s por dia; `GT` é o relógio (sincronizado). `nightK()`. À noite os zumbis enxergam mais e correm mais.
 - **Desempenho**: não use `ctx.filter` (causava lag forte ao bater). Texturas grandes usam `createPattern`.
 - **Modo livre**: começa só com taco, sem contagem, zumbis renascem (`freeRespawn`).
@@ -63,6 +64,7 @@ Deploy: o repositório no GitHub (`yagnarrson-bit/Kaot`) está ligado ao Render 
 - `tools/mock-room.js`: sala falsa via `BroadcastChannel` para testar o multiplayer com 2 abas. Injete com `context.addInitScript`.
 - `tools/teste-exemplo.js`: abre o jogo, pula a intro, começa e tira um print. Sirva a pasta com `npx http-server public -p 8765` (ou `node server.js`).
 - Para inspecionar o estado do jogo nos testes, injete temporariamente uma função `window.__k=()=>({...})` antes da linha `// ================= fluxo =================` numa **cópia** do HTML (não deixe isso no arquivo final).
+- Robôs completos: `tools/robo-solo.js` (todas as dificuldades/modos, prédios, armas, craft, carro, cavalo, esgoto, mutante, morte, continuar, vitória, desempenho), `tools/robo-multiplayer.js` (2 jogadores: mapa, chat, mortes, itens, hospital, relógio, cavalo, renascer, sair/voltar, troca de anfitrião) e `tools/robo-celular.js` (4 tamanhos de tela, joystick, todos os botões). Eles precisam de uma cópia do HTML com `window.__k={ev:s=>eval(s)};` antes de `// ================= fluxo =================` e recebem a URL como argumento (multiplayer: rode `node server.js` servindo essa cópia). Rode o Playwright com o Edge (`channel:'msedge'`).
 
 ## Histórico (o que já existe)
 

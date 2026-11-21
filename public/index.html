@@ -2991,7 +2991,8 @@ function chatRead(pr,rp){if(!Array.isArray(pr.c))return;let top=rp.cs==null?-1:r
   for(const m of pr.c.slice(-3)){if(!Array.isArray(m))continue;const n=m[0],t=chatClean(m[1]);if(!(Number.isInteger(n)&&n>0)||!t)continue;if(!first&&n>top)chatAdd(rp.name,rp.col,t);if(n>top)top=n}
   rp.cs=Math.max(top,0)}
 function netReset(){NET.kr=[];NET.chat=[];NET.cs=0;NET.hr=[];NET.sent={};NET.lastG='';NET.seen={};NET.t=0;NET.gt=0;NET.won=false;RP.clear()}
-function sharers(){const s=scId(SC),out=[];for(const r of RP.values())if(r.sc===s&&!r.dead&&r.x!=null)out.push(r);return out}
+const asleep=r=>performance.now()-(r.seen||0)>5000;
+function sharers(){const s=scId(SC),out=[];for(const r of RP.values())if(r.sc===s&&!r.dead&&r.x!=null&&!asleep(r))out.push(r);return out}
 function zSnap(sh){const pl=[P,...sh],arr=[];
   for(const z of SC.Z){let m=1e9;for(const p of pl){const d=Math.abs(z.x-p.x)+Math.abs(z.y-p.y);if(d<m)m=d}if(m<1150)arr.push([m,z])}
   arr.sort((a,b)=>a[0]-b[0]);let s='';
@@ -3031,10 +3032,10 @@ function netTick(dt){
   const me=peers.find(p=>p.sameTab);if(me)NET.me=me.peer;
   const alive=new Set();let host=NET.me,hostP=null,hr=[NET.rank||0,NET.me||''];
   for(const peer of peers){const pr=peer.presence||{};
-    if(!peer.sameTab&&pr.g&&typeof pr.g==='object'){const rk=[Number.isFinite(pr.g.r)?pr.g.r:1e9,peer.peer];if(rk[0]<hr[0]||(rk[0]===hr[0]&&rk[1]<hr[1])){hr=rk;host=peer.peer;hostP=peer}}
+    if(!peer.sameTab&&pr.g&&typeof pr.g==='object'&&!(RP.get(peer.peer)&&asleep(RP.get(peer.peer)))){const rk=[Number.isFinite(pr.g.r)?pr.g.r:1e9,peer.peer];if(rk[0]<hr[0]||(rk[0]===hr[0]&&rk[1]<hr[1])){hr=rk;host=peer.peer;hostP=peer}}
     if(peer.sameTab||peer.kind!=='viewer')continue;alive.add(peer.peer);
-    let rp=RP.get(peer.peer);if(!rp){rp={peer:peer.peer,name:'Agente',col:pcol(peer.peer),last:null};RP.set(peer.peer,rp);if(pr.n){toast((cleanName(pr.n)||'Um agente')+' entrou na sala.',null);chatAdd('',null,(cleanName(pr.n)||'Um agente')+' entrou.',true)}}
-    if(peer.presence!==rp.last){rp.last=peer.presence;readPeer(peer,rp)}}
+    let rp=RP.get(peer.peer);if(!rp){rp={peer:peer.peer,name:'Agente',col:pcol(peer.peer),last:null,seen:performance.now()};RP.set(peer.peer,rp);if(pr.n){toast((cleanName(pr.n)||'Um agente')+' entrou na sala.',null);chatAdd('',null,(cleanName(pr.n)||'Um agente')+' entrou.',true)}}
+    if(peer.presence!==rp.last){rp.last=peer.presence;rp.seen=performance.now();readPeer(peer,rp)}}
   for(const [k,r] of RP)if(!alive.has(k)){RP.delete(k);toast(r.name+' saiu da sala.',null);chatAdd('',null,r.name+' saiu.',true)}
   NET.host=host===NET.me;
   // mapa diferente do anfitrião (entraram ao mesmo tempo ou a presença dele chegou atrasada): troca para o mundo dele, mantendo os itens
@@ -3049,7 +3050,7 @@ function netTick(dt){
   const dead=state==='end';
   const p={s:scId(SC),x:Math.round(P.x),y:Math.round(P.y),a:Math.round(P.ang*100)/100,
     f:(P.moving?1:0)|(P.run?2:0)|(P.crouch||P.search?4:0)|(dead?8:0)|(P.face<0?16:0)|(P.ride?32:0),h:Math.max(0,Math.round(P.hp)),w:curW(),c:P.char,k:P.sk,
-    sw:Math.round(P.swing*100)/100,sh:NET.shots,z:Math.round(P.jz||0),g:[P.gear.cabeca||0,P.gear.corpo||0],e:Math.min(999999,Math.floor(NET.age||0))};
+    sw:Math.round(P.swing*100)/100,sh:NET.shots,z:Math.round(P.jz||0),g:[P.gear.cabeca||0,P.gear.corpo||0],e:Math.min(999999,Math.floor(NET.age||0)),hb:Math.floor(performance.now()/1000)%60};
   const patch={p};const S=NET.sent;
   const k=NET.kr.join(',');if(k!==S.k)patch.k=S.k=k;
   const dr=giStr();if(dr!==S.dr)patch.dr=S.dr=dr;const pk=GI.pk.join(';');if(pk!==S.pk)patch.pk=S.pk=pk;
@@ -3277,7 +3278,10 @@ addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('skinPanel').hidden){e.pr
 $('contBtn').addEventListener('click',()=>{const s=readSave();if(!s)return;if(NET.on)mpLeave();const w=s.world;if(w){if(DIFF[w.diff])diffSel=w.diff;if(w.mode==='livre'||w.mode==='missao')modeSel=w.mode;syncMenuSel()}
   if(s.char.c==='h'||s.char.c==='m'){charSel=s.char.c;document.querySelectorAll('.charbtn').forEach(o=>o.setAttribute('aria-pressed',o.dataset.ch===charSel?'true':'false'))}LOAD=s;start()});
 menuSave();
-addEventListener('visibilitychange',()=>{if(document.hidden)saveGame()});addEventListener('pagehide',saveGame);
+addEventListener('visibilitychange',()=>{if(document.hidden)saveGame()});
+let hidT=0;addEventListener('visibilitychange',()=>{if(document.hidden){hidT=performance.now();return}
+  if(NET.on&&NET.r&&hidT&&performance.now()-hidT>4000){NET.age=0;let mx=NET.rank||0;try{for(const q of NET.r.peers()){const g=q.presence&&q.presence.g;if(!q.sameTab&&g&&Number.isFinite(g.r)&&g.r<1e9)mx=Math.max(mx,g.r)}}catch(e){}
+    if(mx>(NET.rank||0)||RP.size){NET.rank=mx+1;try{NET.r.presence({g:{s:GSEED,m:modeSel,d:diffSel,r:NET.rank}})}catch(e){}}}hidT=0});addEventListener('pagehide',saveGame);
 document.querySelectorAll('.mbtn').forEach(b=>b.addEventListener('click',()=>{modeSel=b.dataset.m;syncMenuSel()}));
 $('mpPublic').addEventListener('click',()=>mpEnter('public'));$('mpCreate').addEventListener('click',()=>mpEnter(true));$('mpJoin').addEventListener('click',()=>mpEnter(false));
 $('code').addEventListener('keydown',e=>{if(e.key==='Enter')mpEnter(false)});
